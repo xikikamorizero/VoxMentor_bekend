@@ -2,12 +2,11 @@ import { ApiProperty } from "@nestjs/swagger";
 import { IsString } from "class-validator";
 
 export class UpdateUserDto {
-    email: string;
-    password: string;
-
     @ApiProperty({ example: "Вася Пупкин Магистр", description: "ФИО" })
     @IsString({ message: "Должно быть строкой" })
     readonly name?: string | null;
+
+    avatar?: string | null;
 
     @ApiProperty({ example: "Я устал я ухожу", description: "о себе" })
     @IsString({ message: "Должно быть строкой" })

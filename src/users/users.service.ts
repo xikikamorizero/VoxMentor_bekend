@@ -10,6 +10,7 @@ import { Subscription } from "./user_follow.model";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { Like } from "../like_dis/like.model";
 import { Dislike } from "../like_dis/dislike.model";
+import { FilesService } from "../files/files.service";
 
 @Injectable()
 export default class UsersService {
@@ -21,7 +22,8 @@ export default class UsersService {
         private likeRepository: typeof Like,
         @InjectModel(Dislike)
         private dislikeRepository: typeof Dislike,
-        private roleService: RolesService
+        private roleService: RolesService,
+        private fileService: FilesService,
     ) {}
 
     async createUser(dto: CreateUserDto) {
@@ -67,22 +69,20 @@ export default class UsersService {
         return { users, totalUsers, pageCount };
     }
 
-    async updateUser(
-        req: any,
-        userId: number,
-        updateUserDto: Partial<UpdateUserDto>
-    ) {
+    async updateUser(req: any, updateUserDto: Partial<UpdateUserDto>, avatar:any) {
         try {
-            const user = await this.userRepository.findByPk(userId);
             const userTock = req.user;
-            if (user || userId == userTock.id) {
-                updateUserDto.email = user.email;
-                updateUserDto.password = user.password;
+            const user = await this.userRepository.findByPk(userTock.id);
+            if (user) {
+                if(avatar){
+                    const fileName = await this.fileService.createFile(avatar);
+                    updateUserDto.avatar = fileName;
+                }
                 await user.update(updateUserDto);
                 return user;
             } else {
                 throw new HttpException(
-                    "В доступе отказано",
+                    "пользователь не найден",
                     HttpStatus.NOT_FOUND
                 );
             }

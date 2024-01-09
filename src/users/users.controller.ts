@@ -7,8 +7,10 @@ import {
     UseGuards,
     Query,
     Param,
+    UploadedFile,
+    UseInterceptors,
     Request,
-    Put
+    Put,
 } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import UsersService from "./users.service";
@@ -21,6 +23,7 @@ import { AddRoleDto } from "./dto/add-role.dto";
 import { BanUserDto } from "./dto/ban-user.dto";
 import { GetTaskSearchParams } from "./dto/getTaskSearchParams";
 import { UpdateUserDto } from "./dto/update-user.dto";
+import { FileInterceptor } from "@nestjs/platform-express";
 
 @ApiTags("Пользователи")
 @Controller("users")
@@ -37,6 +40,7 @@ export class UsersController {
 
     @ApiOperation({ summary: "Получить всех пользователей" })
     @ApiResponse({ status: 200, type: [User] })
+    // @UseGuards(JwtAuthGuard)
     // @Roles("User")
     @UseGuards(RolesGuard)
     @Get()
@@ -65,18 +69,11 @@ export class UsersController {
         return this.usersService.getAllCourseByAuthorId(authorId);
     }
 
-    @Put(":id")
+    @Put()
+    @UseInterceptors(FileInterceptor("avatar"))
     @UseGuards(JwtAuthGuard)
-    updateProfile(
-        @Request() req,
-        @Param("id") userId: number,
-        @Body() updateDto: Partial<UpdateUserDto>,
-    ) {
-        return this.usersService.updateUser(
-            req,
-            userId,
-            updateDto
-        );
+    updateProfile(@Request() req, @Body() updateDto: Partial<UpdateUserDto>, @UploadedFile() avatar) {
+        return this.usersService.updateUser(req, updateDto, avatar);
     }
 
     @ApiOperation({ summary: "Удалить пользователя по ID" })
@@ -108,81 +105,79 @@ export class UsersController {
     // тесты
     @UseGuards(JwtAuthGuard)
     @Post("test/:id")
-    test(
-        @Request() req,
-        @Param("id") id: number) {
-      console.log("ПРошло", id)
+    test(@Request() req, @Param("id") id: number) {
+        console.log("ПРошло", id);
     }
     //Это поля для запроса связаны с пользователями
 
     @UseGuards(JwtAuthGuard)
     @Post("subscribe/:id")
     subscribe(@Request() req, @Param("id") authorId: number) {
-      const subscriberId = req.user.id; 
-      return this.usersService.subscribe(subscriberId, authorId);
+        const subscriberId = req.user.id;
+        return this.usersService.subscribe(subscriberId, authorId);
     }
-  
+
     @UseGuards(JwtAuthGuard)
     @Delete("unsubscribe/:id")
     unsubscribe(@Request() req, @Param("id") authorId: number) {
-      const subscriberId = req.user.id; 
-      return this.usersService.unsubscribe(subscriberId, authorId);
+        const subscriberId = req.user.id;
+        return this.usersService.unsubscribe(subscriberId, authorId);
     }
-  
+
     @UseGuards(JwtAuthGuard)
     @Get("subscriptions")
     getSubscriptions(@Request() req) {
-      const userId = req.user.id; 
-      return this.usersService.getSubscriptions(userId);
+        const userId = req.user.id;
+        return this.usersService.getSubscriptions(userId);
     }
-  
+
     @UseGuards(JwtAuthGuard)
     @Get("subscribers")
     getSubscribers(@Request() req) {
-      const userId = req.user.id; 
-      return this.usersService.getSubscribers(userId);
+        const userId = req.user.id;
+        return this.usersService.getSubscribers(userId);
     }
 
     // Это запросы для функционала лайков
     @UseGuards(JwtAuthGuard)
     @Post("like/:id")
     likeUser(@Request() req, @Param("id") likedUserId: number) {
-        const userId = req.user.id; 
+        const userId = req.user.id;
         return this.usersService.like(userId, likedUserId);
     }
 
     @UseGuards(JwtAuthGuard)
     @Delete("unlike/:id")
     unlikeUser(@Request() req, @Param("id") likedUserId: number) {
-        const userId = req.user.id; 
+        const userId = req.user.id;
         return this.usersService.unlike(userId, likedUserId);
     }
 
     @UseGuards(JwtAuthGuard)
     @Get("liked")
     getUsersLikedBy(@Request() req) {
-        const userId = req.user.id; 
+        const userId = req.user.id;
         return this.usersService.getUsersLikedBy(userId);
     }
 
     @UseGuards(JwtAuthGuard)
     @Post("dislike/:id")
     dislikeUser(@Request() req, @Param("id") dislikedUserId: number) {
-        const userId = req.user.id; 
+        const userId = req.user.id;
         return this.usersService.dislike(userId, dislikedUserId);
     }
 
     @UseGuards(JwtAuthGuard)
     @Delete("undislike/:id")
     undislikeUser(@Request() req, @Param("id") dislikedUserId: number) {
-        const userId = req.user.id; 
+        const userId = req.user.id;
         return this.usersService.undislike(userId, dislikedUserId);
     }
 
     @UseGuards(JwtAuthGuard)
     @Get("disliked")
     getUsersDislikedBy(@Request() req) {
-        const userId = req.user.id; 
+        const userId = req.user.id;
         return this.usersService.getUsersDislikedBy(userId);
     }
 }

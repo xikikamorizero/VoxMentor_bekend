@@ -12,12 +12,14 @@ import { Portfolio } from '../portfolio/portfolio.model';
 import{Subscription} from './user_follow.model';
 import { Like } from '../like_dis/like.model';
 import { Dislike } from '../like_dis/dislike.model';
+import { FilesModule } from '../files/files.module';
 
 @Module({
   controllers: [UsersController],
   providers: [UsersService],
   imports: [
       SequelizeModule.forFeature([User, Role, UserRoles, Subscription, Course, Portfolio, Like, Dislike]),
+      FilesModule,
       RolesModule,
       forwardRef(() => AuthModule),
   ],

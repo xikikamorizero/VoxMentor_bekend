@@ -19,6 +19,7 @@ import { Dislike } from "../like_dis/dislike.model";
 interface UserCreationAttrs {
     email: string;
     password: string;
+    image?:string | null;
 }
 
 @Table({ tableName: "users_end" })
