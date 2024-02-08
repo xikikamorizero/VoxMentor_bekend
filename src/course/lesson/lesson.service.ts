@@ -8,6 +8,7 @@ import { Lesson } from "./lesson.model";
 import { Course } from "../course.model";
 import { InjectModel } from "@nestjs/sequelize";
 import { CreateLessonDto } from "./dto/create-lesson.dto";
+import { EditLessonDto } from "./dto/edit-lesson.dto";
 import { FilesService } from "../../files/files.service";
 import UsersService from "../../users/users.service";
 
@@ -49,7 +50,10 @@ export class LessonsService {
             if (course) {
                 const user = req.user;
                 if (user.id == dto.courseId) {
-                    const fileName = await this.fileService.createFile(image);
+                    let fileName = null;
+                    if (image) {
+                        fileName = await this.fileService.createFile(image);
+                    }
                     const lesson = await this.lessonRepository.create({
                         ...dto,
                         image: fileName,
@@ -73,18 +77,22 @@ export class LessonsService {
     async updateLessons(
         req: any,
         lessonId: number,
-        updateDto: Partial<CreateLessonDto>,
+        updateDto: Partial<EditLessonDto>,
         image: any
     ) {
         try {
-            const course = await this.courseRepository.findByPk(
-                updateDto.courseId
-            );
             const lesson = await this.lessonRepository.findByPk(lessonId);
+            const course = await this.courseRepository.findByPk(
+                lesson.courseId
+            );
+           
             if (course && lesson && course.id == lesson.courseId) {
                 const user = req.user;
                 if (course.authorId == user.id) {
-                    const fileName = await this.fileService.createFile(image);
+                    let fileName = lesson.image;
+                    if (image) {
+                        fileName = await this.fileService.createFile(image);
+                    }
                     await lesson.update({
                         ...updateDto,
                         image: fileName,

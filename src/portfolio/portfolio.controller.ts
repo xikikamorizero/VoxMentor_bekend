@@ -10,6 +10,7 @@ import {
     Query,
     Param,
     Put,
+    Delete,
 } from "@nestjs/common";
 import { CreatePortfolioDto } from "./dto/create-portfolio.dto";
 import { PortfolioService } from "./portfolio.service";
@@ -38,14 +39,19 @@ export class PortfolioController {
         return this.portfolioService.create(
             req,
             dto,
-            files.image[0],
-            files.docs[0]
+            files.image ? files.image[0] : null,
+            files.docs ? files.docs[0] : null
         );
     }
 
     @Get()
     getAll(@Query() filerDto: GetTaskSearchParams) {
         return this.portfolioService.getAllPortfolio();
+    }
+
+    @Get(":id")
+    getPortfolioById(@Param("id") portfolioId: number) {
+        return this.portfolioService.getPortfolioById(portfolioId);
     }
 
     @UseGuards(JwtAuthGuard)
@@ -67,8 +73,14 @@ export class PortfolioController {
             req,
             portfolioId,
             updatePortfolioDto,
-            files.image[0],
-            files.docs[0]
+            files.image ? files.image[0] : null,
+            files.docs ? files.docs[0] : null
         );
+    }
+
+    @UseGuards(JwtAuthGuard)
+    @Delete(":id")
+    deletePortfolio(@Request() req, @Param("id") portfolioId: number) {
+        return this.portfolioService.deletePortfolioById(req, portfolioId);
     }
 }

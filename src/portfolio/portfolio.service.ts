@@ -16,29 +16,47 @@ export class PortfolioService {
             const user = req.user;
             dto.userId = user.id;
             console.log(user);
-            const fileName = await this.fileService.createFile(image);
-            const fileDocsName = await this.fileService.createFile(docs);
+
+            let fileName = null;
+            if (image) {
+                fileName = await this.fileService.createFile(image);
+            }
+
+            let fileDocsName = null;
+            if (docs) {
+                fileDocsName = await this.fileService.createFile(docs);
+            }
+
             const portfolio = await this.portfolioRepository.create({
                 ...dto,
                 image: fileName,
                 docs: fileDocsName,
             });
+
             return portfolio;
-        } catch {
-            console.log("что-то пошло не так");
+        } catch (error) {
+            console.log("что-то пошло не так", error);
         }
     }
 
     async getAllPortfolio(page: number = 1, limit: number = 10) {
         const offset = (page - 1) * limit;
-        const post = await this.portfolioRepository.findAll({
+        const portfolio = await this.portfolioRepository.findAll({
             include: { all: true },
             offset,
             limit,
         });
         const totalPortfolio = await this.portfolioRepository.count({});
         const pageCount = Math.ceil(totalPortfolio / limit);
-        return { post, totalPortfolio, pageCount };
+        return { portfolio, totalPortfolio, page, pageCount, limit };
+    }
+
+    async getPortfolioById(id: number) {
+        const portfolio = await this.portfolioRepository.findOne({
+            where: { id },
+            include: { all: true },
+        });
+        return portfolio;
     }
 
     async updatePortfolio(
@@ -54,17 +72,24 @@ export class PortfolioService {
             );
             if (portfolio) {
                 const user = req.user;
-                if(portfolio.userId==user.id){
+                if (portfolio.userId == user.id) {
                     updatePortfolioDto.userId = user.id;
-                    const fileName = await this.fileService.createFile(image);
-                    const fileDocsName = await this.fileService.createFile(docs);
+                    let fileName = portfolio.image;
+                    if (image) {
+                        fileName = await this.fileService.createFile(image);
+                    }
+
+                    let fileDocsName = portfolio.docs;
+                    if (docs) {
+                        fileDocsName = await this.fileService.createFile(docs);
+                    }
                     await portfolio.update({
                         ...updatePortfolioDto,
                         image: fileName,
                         docs: fileDocsName,
                     });
                     return portfolio;
-                }else{
+                } else {
                     throw new HttpException(
                         "Вы не являетесь автором",
                         HttpStatus.NOT_FOUND
@@ -78,6 +103,41 @@ export class PortfolioService {
             }
         } catch (error) {
             console.log(error);
+        }
+    }
+
+    async deletePortfolioById(req: any, portfolioId: number) {
+        try {
+            const portfolio = await this.portfolioRepository.findByPk(portfolioId);
+    
+            if (portfolio) {
+                const user = req.user;
+
+                if (portfolio.userId === user.id) {
+                    if (portfolio.image) {
+                        await this.fileService.deleteFile(portfolio.image);
+                    }
+                    if (portfolio.docs) {
+                        await this.fileService.deleteFile(portfolio.docs);
+                    }
+                    await portfolio.destroy();
+
+                    return { success: true, message: 'Портфолио успешно удалено' };
+                } else {
+                    throw new HttpException(
+                        'Вы не являетесь автором портфолио',
+                        HttpStatus.FORBIDDEN
+                    );
+                }
+            } else {
+                throw new HttpException('Портфолио не найдено', HttpStatus.NOT_FOUND);
+            }
+        } catch (error) {
+            console.log(error);
+            throw new HttpException(
+                "Ошибка при удалении портфолио",
+                HttpStatus.INTERNAL_SERVER_ERROR
+            );
         }
     }
 }

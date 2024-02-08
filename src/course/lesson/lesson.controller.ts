@@ -34,7 +34,11 @@ export class LessonsController {
         @Body() lessondto: CreateLessonDto,
         @UploadedFile() image
     ) {
-        return this.lessonsService.createLesson(req, lessondto, image);
+        return this.lessonsService.createLesson(
+            req,
+            lessondto,
+            image ? image : null
+        );
     }
 
     @Put(":id")
@@ -46,7 +50,12 @@ export class LessonsController {
         @Body() updateDto: Partial<CreateLessonDto>,
         @UploadedFile() image
     ) {
-        return this.lessonsService.updateLessons(req, lessonId, updateDto, image);
+        return this.lessonsService.updateLessons(
+            req,
+            lessonId,
+            updateDto,
+            image ? image : null
+        );
     }
 
     @UseGuards(JwtAuthGuard)

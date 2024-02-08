@@ -10,7 +10,7 @@ import {
     Query,
     UseGuards,
     Request,
-    Put
+    Put,
 } from "@nestjs/common";
 import { CoursesService } from "./course.service";
 import { CreateCourseDto } from "./dto/create-course.dto";
@@ -26,33 +26,34 @@ export class CoursesController {
     @Get(":id")
     getAllCourses(
         @Request() req,
-        @Param("id") authorId: number,
+        @Param("id") courseId: number,
         @Query() filerDto: GetTaskSearchParams
     ) {
-        if (filerDto.category) {
-            return this.coursesService.getCoursesByAuthorByCategory(
-                req,
-                authorId,
-                filerDto.page,
-                filerDto.limit,
-                filerDto.category
-            );
-        } else if (filerDto.keyword) {
-            return this.coursesService.getCoursesByAuthorByKeyword(
-                req,
-                authorId,
-                filerDto.page,
-                filerDto.limit,
-                filerDto.keyword
-            );
-        } else {
-            return this.coursesService.getAllCoursesByAuthorId(
-                req,
-                authorId,
-                filerDto.page,
-                filerDto.limit
-            );
-        }
+        return this.coursesService.getCoursesById(req, courseId);
+        // if (filerDto.category) {
+        //     return this.coursesService.getCoursesByAuthorByCategory(
+        //         req,
+        //         authorId,
+        //         filerDto.page,
+        //         filerDto.limit,
+        //         filerDto.category
+        //     );
+        // } else if (filerDto.keyword) {
+        //     return this.coursesService.getCoursesByAuthorByKeyword(
+        //         req,
+        //         authorId,
+        //         filerDto.page,
+        //         filerDto.limit,
+        //         filerDto.keyword
+        //     );
+        // } else {
+        //     return this.coursesService.getAllCoursesByAuthorId(
+        //         req,
+        //         authorId,
+        //         filerDto.page,
+        //         filerDto.limit
+        //     );
+        // }
     }
 
     @UseGuards(JwtAuthGuard)
@@ -69,10 +70,13 @@ export class CoursesController {
         @Body() coursedto: CreateCourseDto,
         @UploadedFile() image
     ) {
-        return this.coursesService.createCourse(coursedto, image, req);
+        return this.coursesService.createCourse(
+            coursedto,
+            image ? image : null,
+            req
+        );
     }
 
-  
     @Put(":id")
     @UseGuards(JwtAuthGuard)
     @UseInterceptors(FileInterceptor("image"))
@@ -86,7 +90,7 @@ export class CoursesController {
             req,
             courseId,
             updateDto,
-            image
+            image ? image : null
         );
     }
 

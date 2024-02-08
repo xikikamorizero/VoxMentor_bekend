@@ -45,7 +45,11 @@ export class UsersController {
     @UseGuards(RolesGuard)
     @Get()
     getAll(@Query() filerDto: GetTaskSearchParams) {
-        return this.usersService.getAllUsers(filerDto.page, filerDto.limit);
+        return this.usersService.getAllUsers(
+            filerDto.keyword,
+            filerDto.page,
+            filerDto.limit
+        );
     }
 
     @ApiOperation({ summary: "Получить всех пользователей" })
@@ -55,9 +59,30 @@ export class UsersController {
     @Get("professor")
     getAllProfessor(@Query() filerDto: GetTaskSearchParams) {
         return this.usersService.getAllUsersByRoleProfessor(
+            filerDto.keyword,
             filerDto.page,
             filerDto.limit
         );
+    }
+
+    @ApiOperation({ summary: "Получить пользователя по id" })
+    @Get(":id")
+    getUserById(@Param("id") userId: number) {
+        return this.usersService.getUserById(userId);
+    }
+
+    @ApiOperation({ summary: "Получить профиль" })
+    @Get("profile/me")
+    @UseGuards(JwtAuthGuard)
+    getProfile(@Request() req) {
+        return this.usersService.getProfile(req);
+    }
+
+    @ApiOperation({ summary: "Получить Портфолио" })
+    @Get("project/me")
+    @UseGuards(JwtAuthGuard)
+    getProject(@Request() req) {
+        return this.usersService.getMyProject(req);
     }
 
     @ApiOperation({ summary: "Получить всех пользователей" })
@@ -72,7 +97,11 @@ export class UsersController {
     @Put()
     @UseInterceptors(FileInterceptor("avatar"))
     @UseGuards(JwtAuthGuard)
-    updateProfile(@Request() req, @Body() updateDto: Partial<UpdateUserDto>, @UploadedFile() avatar) {
+    updateProfile(
+        @Request() req,
+        @Body() updateDto: Partial<UpdateUserDto>,
+        @UploadedFile() avatar
+    ) {
         return this.usersService.updateUser(req, updateDto, avatar);
     }
 

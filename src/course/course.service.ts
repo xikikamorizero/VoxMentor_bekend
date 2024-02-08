@@ -47,7 +47,7 @@ export class CoursesService {
                 },
             });
             const pageCount = Math.ceil(totalCourses / limit);
-            return { courses, totalCourses, pageCount };
+            return { courses, totalCourses, page, pageCount, limit };
         } else {
             throw new NotFoundException(
                 "this course can only be viewed by subscribers of its creator"
@@ -102,7 +102,7 @@ export class CoursesService {
 
             const pageCount = Math.ceil(totalCourses / limit);
 
-            return { courses, totalCourses, pageCount };
+            return { courses, totalCourses, page, pageCount, limit };
         } else {
             throw new NotFoundException(
                 "this course can only be viewed by subscribers of its creator"
@@ -154,7 +154,7 @@ export class CoursesService {
                 },
             });
             const pageCount = Math.ceil(totalCourses / limit);
-            return { courses, totalCourses, pageCount };
+            return { courses, totalCourses, page, pageCount, limit };
         } else {
             throw new NotFoundException(
                 "this course can only be viewed by subscribers of its creator"
@@ -194,11 +194,32 @@ export class CoursesService {
         return courses;
     }
 
+    async getCoursesById(req: any, courseId: number) {
+        const course = await this.courseRepository.findByPk(courseId, {
+            include: { all: true },
+        });
+        if (course) {
+            const user = req.user;
+            const isSubscribed = await this.usersService.checkSubscription(
+                user.id,
+                course.authorId
+            );
+            if (isSubscribed || user.id == course.authorId) {
+                return course;
+            }
+        } else {
+            throw new NotFoundException("course not found");
+        }
+    }
+
     async createCourse(dto: CreateCourseDto, image: any, req: any) {
         try {
             const user = req.user;
             dto.authorId = user.id;
-            const fileName = await this.fileService.createFile(image);
+            let fileName = null;
+            if (image) {
+                fileName = await this.fileService.createFile(image);
+            }
             const course = await this.courseRepository.create({
                 ...dto,
                 image: fileName,
@@ -216,17 +237,19 @@ export class CoursesService {
         image: any
     ) {
         try {
-            const course = await this.courseRepository.findByPk(
-                courseId
-            );
+            const course = await this.courseRepository.findByPk(courseId);
             if (course) {
                 const user = req.user;
                 if (course.authorId == user.id) {
                     updateDto.authorId = user.id;
-                    const fileName = await this.fileService.createFile(image);
+                    let fileName = course.image;
+                    if (image) {
+                        fileName = await this.fileService.createFile(image);
+                    }
+
                     await course.update({
                         ...updateDto,
-                        image: fileName
+                        image: fileName,
                     });
                     return course;
                 } else {
@@ -236,10 +259,7 @@ export class CoursesService {
                     );
                 }
             } else {
-                throw new HttpException(
-                    "Курс не найден",
-                    HttpStatus.NOT_FOUND
-                );
+                throw new HttpException("Курс не найден", HttpStatus.NOT_FOUND);
             }
         } catch (error) {
             console.log(error);

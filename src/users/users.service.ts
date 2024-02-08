@@ -1,4 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { Op } from "sequelize";
 import { User } from "./users.model";
 import { InjectModel } from "@nestjs/sequelize";
 import { CreateUserDto } from "./dto/create-user.dto";
@@ -23,7 +24,7 @@ export default class UsersService {
         @InjectModel(Dislike)
         private dislikeRepository: typeof Dislike,
         private roleService: RolesService,
-        private fileService: FilesService,
+        private fileService: FilesService
     ) {}
 
     async createUser(dto: CreateUserDto) {
@@ -34,22 +35,41 @@ export default class UsersService {
         return user;
     }
 
-    async getAllUsers(page: number = 1, limit: number = 10) {
+    async getAllUsers(keyword: string, page: number = 1, limit: number = 10) {
         const offset = (page - 1) * limit;
+        const whereClause = keyword
+            ? { name: { [Op.iLike]: `%${keyword}%` } }
+            : {};
         const users = await this.userRepository.findAll({
+            where: whereClause,
             attributes: { exclude: ["password"] },
             offset,
             limit,
-            include: { all: true },
+            include: [
+                {
+                    all: true,
+                    attributes: { exclude: ["password"] },
+                },
+            ],
         });
-        const totalUsers = await this.userRepository.count({});
+        const totalUsers = await this.userRepository.count({
+            where: whereClause,
+        });
         const pageCount = Math.ceil(totalUsers / limit);
-        return { users, totalUsers, pageCount };
+        return { users, totalUsers, page, pageCount, limit };
     }
 
-    async getAllUsersByRoleProfessor(page: number = 1, limit: number = 10) {
+    async getAllUsersByRoleProfessor(
+        keyword: string,
+        page: number = 1,
+        limit: number = 10
+    ) {
         const offset = (page - 1) * limit;
+        const whereClause = keyword
+            ? { name: { [Op.iLike]: `%${keyword}%` } }
+            : {};
         const users = await this.userRepository.findAll({
+            where: whereClause,
             attributes: { exclude: ["password"] },
             offset,
             limit,
@@ -60,21 +80,59 @@ export default class UsersService {
             },
         });
         const totalUsers = await this.userRepository.count({
+            where: whereClause,
             include: {
                 model: Role,
                 where: { value: "Professor" },
             },
         });
         const pageCount = Math.ceil(totalUsers / limit);
-        return { users, totalUsers, pageCount };
+        return { users, totalUsers, page, pageCount, limit };
     }
 
-    async updateUser(req: any, updateUserDto: Partial<UpdateUserDto>, avatar:any) {
+    async getMyProject(req: any) {
+        try {
+            const userId = req.user.id;
+            const user = await this.userRepository.findByPk(userId, {
+                attributes: { exclude: ["password"] },
+                include: [{ all: true, attributes: { exclude: ["password"] } }],
+            });
+
+            if (user) {
+                return {
+                    portfolio: user.postfolio ? user.postfolio : [],
+                    course: user.course ? user.course : [],
+                };
+            } else {
+                throw new HttpException(
+                    "Пользователь не найден",
+                    HttpStatus.NOT_FOUND
+                );
+            }
+        } catch (error) {
+            console.error(error);
+            throw new HttpException(
+                "Ошибка при получении портфолио пользователя",
+                HttpStatus.INTERNAL_SERVER_ERROR
+            );
+        }
+    }
+
+    async updateUser(
+        req: any,
+        updateUserDto: Partial<UpdateUserDto>,
+        avatar: any
+    ) {
         try {
             const userTock = req.user;
-            const user = await this.userRepository.findByPk(userTock.id);
+            // const user = await this.userRepository.findByPk(userTock.id);
+            const user = await this.userRepository.findOne({
+                where: { id:userTock.id },
+                attributes: { exclude: ["password"] },
+                include: [{ all: true, attributes: { exclude: ["password"] } }],
+            });
             if (user) {
-                if(avatar){
+                if (avatar) {
                     const fileName = await this.fileService.createFile(avatar);
                     updateUserDto.avatar = fileName;
                 }
@@ -109,6 +167,28 @@ export default class UsersService {
             include: { all: true },
         });
         return user;
+    }
+
+    async getUserById(id: number) {
+        const user = await this.userRepository.findOne({
+            where: { id },
+            attributes: { exclude: ["password"] },
+            include: [{ all: true, attributes: { exclude: ["password"] } }],
+        });
+        return user;
+    }
+
+    async getProfile(req: any) {
+        try {
+            const userId = req.user.id;
+            const user = await this.userRepository.findByPk(userId, {
+                attributes: { exclude: ["password"] },
+                include: [{ all: true, attributes: { exclude: ["password"] } }],
+            });
+            return user;
+        } catch (error) {
+            console.log("тут ошибка");
+        }
     }
 
     async addRole(dto: AddRoleDto) {
