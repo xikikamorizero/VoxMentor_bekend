@@ -127,7 +127,7 @@ export default class UsersService {
             const userTock = req.user;
             // const user = await this.userRepository.findByPk(userTock.id);
             const user = await this.userRepository.findOne({
-                where: { id:userTock.id },
+                where: { id: userTock.id },
                 attributes: { exclude: ["password"] },
                 include: [{ all: true, attributes: { exclude: ["password"] } }],
             });
@@ -224,11 +224,11 @@ export default class UsersService {
         const subscriber = await this.userRepository.findByPk(subscriberId);
         if (author && subscriber) {
             if (subscriberId != authorId) {
-                const subscription = await this.subscriptionRepository.create({
+                await this.subscriptionRepository.create({
                     subscriberId,
                     authorId,
                 } as Subscription);
-                return subscription;
+                return { success: true, message: "Подписка прошла успешно" };
             } else {
                 throw new HttpException(
                     "you can't subscribe to yourself",
