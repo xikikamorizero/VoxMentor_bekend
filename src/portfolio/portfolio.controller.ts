@@ -46,7 +46,13 @@ export class PortfolioController {
 
     @Get()
     getAll(@Query() filerDto: GetTaskSearchParams) {
-        return this.portfolioService.getAllPortfolio();
+        return this.portfolioService.getAllPortfolio(
+            filerDto.keyword,
+            filerDto.category,
+            filerDto.type,
+            filerDto.page,
+            filerDto.limit
+        );
     }
 
     @Get(":id")

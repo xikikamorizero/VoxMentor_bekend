@@ -47,6 +47,8 @@ export class UsersController {
     getAll(@Query() filerDto: GetTaskSearchParams) {
         return this.usersService.getAllUsers(
             filerDto.keyword,
+            filerDto.place_of_work,
+            filerDto.science_degree,
             filerDto.page,
             filerDto.limit
         );

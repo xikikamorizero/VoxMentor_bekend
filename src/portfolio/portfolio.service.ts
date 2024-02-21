@@ -3,6 +3,7 @@ import { CreatePortfolioDto } from "./dto/create-portfolio.dto";
 import { InjectModel } from "@nestjs/sequelize";
 import { Portfolio } from "./portfolio.model";
 import { FilesPortfolioService } from "../files_portfolio/files_portfolio.service";
+import { Op } from "sequelize";
 
 @Injectable()
 export class PortfolioService {
@@ -39,16 +40,42 @@ export class PortfolioService {
         }
     }
 
-    async getAllPortfolio(page: number = 1, limit: number = 10) {
-        const offset = (page - 1) * limit;
-        const portfolio = await this.portfolioRepository.findAll({
-            include: { all: true },
-            offset,
-            limit,
-        });
-        const totalPortfolio = await this.portfolioRepository.count({});
-        const pageCount = Math.ceil(totalPortfolio / limit);
-        return { portfolio, totalPortfolio, page, pageCount, limit };
+    async getAllPortfolio(
+        keyword: string,
+        category: string,
+        type: string,
+        page: number = 1,
+        limit: number = 10
+    ) {
+        try {
+            const offset = (page - 1) * limit;
+            const whereClause: any = {};
+            if (keyword) {
+                whereClause.title = { [Op.iLike]: `%${keyword}%` };
+            }
+            if (category) {
+                whereClause.category = { [Op.iLike]: `%${category}%` };
+            }
+            if (type) {
+                whereClause.type = {
+                    [Op.iLike]: `%${type}%`,
+                };
+            }
+            const portfolio = await this.portfolioRepository.findAll({
+                where: whereClause,
+                include: { all: true },
+                offset,
+                limit,
+            });
+            const totalPortfolio = await this.portfolioRepository.count({
+                where: whereClause,
+            });
+            const pageCount = Math.ceil(totalPortfolio / limit);
+            return { portfolio, totalPortfolio, page, pageCount, limit };
+        } catch(error) {
+            console.error("Error in getAllPortfolio:", error);
+            throw error;
+        }
     }
 
     async getPortfolioById(id: number) {
@@ -108,8 +135,10 @@ export class PortfolioService {
 
     async deletePortfolioById(req: any, portfolioId: number) {
         try {
-            const portfolio = await this.portfolioRepository.findByPk(portfolioId);
-    
+            const portfolio = await this.portfolioRepository.findByPk(
+                portfolioId
+            );
+
             if (portfolio) {
                 const user = req.user;
 
@@ -122,15 +151,21 @@ export class PortfolioService {
                     }
                     await portfolio.destroy();
 
-                    return { success: true, message: 'Портфолио успешно удалено' };
+                    return {
+                        success: true,
+                        message: "Портфолио успешно удалено",
+                    };
                 } else {
                     throw new HttpException(
-                        'Вы не являетесь автором портфолио',
+                        "Вы не являетесь автором портфолио",
                         HttpStatus.FORBIDDEN
                     );
                 }
             } else {
-                throw new HttpException('Портфолио не найдено', HttpStatus.NOT_FOUND);
+                throw new HttpException(
+                    "Портфолио не найдено",
+                    HttpStatus.NOT_FOUND
+                );
             }
         } catch (error) {
             console.log(error);

@@ -35,28 +35,50 @@ export default class UsersService {
         return user;
     }
 
-    async getAllUsers(keyword: string, page: number = 1, limit: number = 10) {
-        const offset = (page - 1) * limit;
-        const whereClause = keyword
-            ? { name: { [Op.iLike]: `%${keyword}%` } }
-            : {};
-        const users = await this.userRepository.findAll({
-            where: whereClause,
-            attributes: { exclude: ["password"] },
-            offset,
-            limit,
-            include: [
-                {
-                    all: true,
-                    attributes: { exclude: ["password"] },
-                },
-            ],
-        });
-        const totalUsers = await this.userRepository.count({
-            where: whereClause,
-        });
-        const pageCount = Math.ceil(totalUsers / limit);
-        return { users, totalUsers, page, pageCount, limit };
+    async getAllUsers(
+        keyword: string,
+        placeOfWork: string,
+        scienceDegree: string,
+        page: number = 1,
+        limit: number = 10
+    ) {
+        try {
+            const offset = (page - 1) * limit;
+            const whereClause: any = {};
+            if (keyword) {
+                console.log(keyword);
+                whereClause.name = { [Op.iLike]: `%${keyword}%` };
+            }
+            if (placeOfWork) {
+                whereClause.place_of_work = { [Op.iLike]: `%${placeOfWork}%` };
+            }
+            if (scienceDegree) {
+                whereClause.science_degree = {
+                    [Op.iLike]: `%${scienceDegree}%`,
+                };
+            }
+
+            const usersPromise = this.userRepository.findAll({
+                where: whereClause,
+                attributes: { exclude: ["password"] },
+                offset,
+                limit,
+                include: [{ all: true, attributes: { exclude: ["password"] } }],
+            });
+
+            const totalUsersPromise = this.userRepository.count({
+                where: whereClause,
+            });
+            const [users, totalUsers] = await Promise.all([
+                usersPromise,
+                totalUsersPromise,
+            ]);
+            const pageCount = Math.ceil(totalUsers / limit);
+            return { users, totalUsers, page, pageCount, limit };
+        } catch (error) {
+            console.error("Error in getAllUsers:", error);
+            throw error;
+        }
     }
 
     async getAllUsersByRoleProfessor(

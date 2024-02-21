@@ -15,7 +15,7 @@ interface PortfolioCreationAttrs {
     docs: string | null;
 }
 
-@Table({ tableName: "portfolio" })
+@Table({ tableName: "portfolio_ver" })
 export class Portfolio extends Model<Portfolio, PortfolioCreationAttrs> {
     @Column({
         type: DataType.INTEGER,
@@ -36,6 +36,12 @@ export class Portfolio extends Model<Portfolio, PortfolioCreationAttrs> {
 
     @Column({ type: DataType.STRING, allowNull: true })
     docs: string;
+
+    @Column({ type: DataType.STRING, allowNull: false })
+    category: string;
+
+    @Column({ type: DataType.STRING, allowNull: false })
+    type: string;
 
     @ForeignKey(() => User)
     @Column({ type: DataType.INTEGER })
