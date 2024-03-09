@@ -207,6 +207,9 @@ export class CoursesService {
             if (isSubscribed || user.id == course.authorId) {
                 return course;
             }
+            else{
+                throw new NotFoundException("нет доступа");
+            }
         } else {
             throw new NotFoundException("course not found");
         }

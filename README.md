@@ -1,9 +1,2 @@
-## Не забудь звезду
-
-в файле .development.env конфигурация для бд. Добавить свою.
-
+## Бекенд для веб-платформы VoxMentor
 #### npm run start:dev - Запуск
-
-##
-
-#### docker-compose up 
