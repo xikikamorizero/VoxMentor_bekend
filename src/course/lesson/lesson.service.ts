@@ -49,7 +49,7 @@ export class LessonsService {
             const course = await this.courseRepository.findByPk(dto.courseId);
             if (course) {
                 const user = req.user;
-                if (user.id == dto.courseId) {
+                if (user.id == course.authorId) {
                     let fileName = null;
                     if (image) {
                         fileName = await this.fileService.createFile(image);
@@ -62,15 +62,22 @@ export class LessonsService {
                     await this.updateCourseLessonCount(courseId);
                     return lesson;
                 } else {
-                    throw new NotFoundException(
-                        "you are not the author of the course"
+                    throw new HttpException(
+                        "Вы не являетесь автором",
+                        HttpStatus.FORBIDDEN
                     );
                 }
             } else {
-                throw new NotFoundException("Course not found");
+                throw new HttpException(
+                    '',
+                    HttpStatus.NOT_FOUND
+                );
             }
         } catch (error) {
-            console.log(error);
+            throw new HttpException(
+                'Слишком длинное описание',
+                HttpStatus.NOT_FOUND
+            );
         }
     }
 

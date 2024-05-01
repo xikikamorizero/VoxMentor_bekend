@@ -62,6 +62,8 @@ export class UsersController {
     getAllProfessor(@Query() filerDto: GetTaskSearchParams) {
         return this.usersService.getAllUsersByRoleProfessor(
             filerDto.keyword,
+            filerDto.place_of_work,
+            filerDto.science_degree,
             filerDto.page,
             filerDto.limit
         );

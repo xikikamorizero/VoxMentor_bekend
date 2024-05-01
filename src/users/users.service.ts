@@ -83,33 +83,52 @@ export default class UsersService {
 
     async getAllUsersByRoleProfessor(
         keyword: string,
+        placeOfWork: string,
+        scienceDegree: string,
         page: number = 1,
         limit: number = 10
     ) {
-        const offset = (page - 1) * limit;
-        const whereClause = keyword
-            ? { name: { [Op.iLike]: `%${keyword}%` } }
-            : {};
-        const users = await this.userRepository.findAll({
-            where: whereClause,
-            attributes: { exclude: ["password"] },
-            offset,
-            limit,
-            include: {
-                model: Role,
-                attributes: [],
-                where: { value: "Professor" },
-            },
-        });
-        const totalUsers = await this.userRepository.count({
-            where: whereClause,
-            include: {
-                model: Role,
-                where: { value: "Professor" },
-            },
-        });
-        const pageCount = Math.ceil(totalUsers / limit);
-        return { users, totalUsers, page, pageCount, limit };
+        try {
+            const offset = (page - 1) * limit;
+            const whereClause: any = {};
+
+            if (keyword) {
+                console.log(keyword);
+                whereClause.name = { [Op.iLike]: `%${keyword}%` };
+            }
+            if (placeOfWork) {
+                whereClause.place_of_work = { [Op.iLike]: `%${placeOfWork}%` };
+            }
+            if (scienceDegree) {
+                whereClause.science_degree = {
+                    [Op.iLike]: `%${scienceDegree}%`,
+                };
+            }
+
+            const users = await this.userRepository.findAll({
+                where: whereClause,
+                attributes: { exclude: ["password"] },
+                offset,
+                limit,
+                include: {
+                    model: Role,
+                    attributes: [],
+                    where: { value: "Professor" },
+                },
+            });
+            const totalUsers = await this.userRepository.count({
+                where: whereClause,
+                include: {
+                    model: Role,
+                    where: { value: "Professor" },
+                },
+            });
+            const pageCount = Math.ceil(totalUsers / limit);
+            return { users, totalUsers, page, pageCount, limit };
+        } catch (error) {
+            console.error("Error in getAllUsersByRoleProfessor:", error);
+            throw error;
+        }
     }
 
     async getMyProject(req: any) {
@@ -134,7 +153,7 @@ export default class UsersService {
         } catch (error) {
             console.error(error);
             throw new HttpException(
-                "Ошибка при получении портфолио пользователя",
+                "Ошибка при получении проектов пользователя",
                 HttpStatus.INTERNAL_SERVER_ERROR
             );
         }
@@ -158,6 +177,13 @@ export default class UsersService {
                     const fileName = await this.fileService.createFile(avatar);
                     updateUserDto.avatar = fileName;
                 }
+                if (typeof updateUserDto.categories === "string") {
+                    if (updateUserDto.categories === "null") {
+                        updateUserDto.categories = null;
+                    } else {
+                        updateUserDto.categories = [updateUserDto.categories];
+                    }
+                }
                 await user.update(updateUserDto);
                 return user;
             } else {
@@ -167,7 +193,7 @@ export default class UsersService {
                 );
             }
         } catch (error) {
-            console.log(error);
+            console.log("Xeee", error);
         }
     }
 
@@ -244,21 +270,37 @@ export default class UsersService {
     async subscribe(subscriberId: number, authorId: number) {
         const author = await this.userRepository.findByPk(authorId);
         const subscriber = await this.userRepository.findByPk(subscriberId);
+        const subscription = await this.subscriptionRepository.findOne({
+            where: { subscriberId, authorId },
+        });
         if (author && subscriber) {
             if (subscriberId != authorId) {
-                await this.subscriptionRepository.create({
-                    subscriberId,
-                    authorId,
-                } as Subscription);
-                return { success: true, message: "Подписка прошла успешно" };
+                if (!subscription) {
+                    await this.subscriptionRepository.create({
+                        subscriberId,
+                        authorId,
+                    } as Subscription);
+                    return {
+                        success: true,
+                        message: "Подписка прошла успешно",
+                    };
+                } else {
+                    throw new HttpException(
+                        "Вы уже подписаны.",
+                        HttpStatus.NOT_FOUND
+                    );
+                }
             } else {
                 throw new HttpException(
-                    "you can't subscribe to yourself",
+                    "Вы не можете подписаться на самого себя.",
                     HttpStatus.NOT_FOUND
                 );
             }
         } else {
-            throw new HttpException("User is not found", HttpStatus.NOT_FOUND);
+            throw new HttpException(
+                "Пользователь не найден",
+                HttpStatus.NOT_FOUND
+            );
         }
     }
 
@@ -273,7 +315,7 @@ export default class UsersService {
             return { success: true, message: "Отписка прошла успешно" };
         } else {
             throw new HttpException(
-                "you are not subscribed",
+                "Вы не подписаны на пользователя",
                 HttpStatus.NOT_FOUND
             );
         }
@@ -313,10 +355,9 @@ export default class UsersService {
     async like(userId: number, likedUserId: number) {
         const user = await this.userRepository.findByPk(userId);
         const likedUser = await this.userRepository.findByPk(likedUserId);
-
         if (!user || !likedUser) {
             throw new HttpException(
-                "User or liked user not found",
+                "Пользователь не найден",
                 HttpStatus.NOT_FOUND
             );
         } else {
@@ -325,7 +366,7 @@ export default class UsersService {
             });
             if (existingLike) {
                 throw new HttpException(
-                    "already worth a like",
+                    "like уже поставлен",
                     HttpStatus.NOT_FOUND
                 );
             } else {

@@ -37,6 +37,7 @@ export class PortfolioService {
             return portfolio;
         } catch (error) {
             console.log("что-то пошло не так", error);
+            throw error;
         }
     }
 
@@ -72,7 +73,7 @@ export class PortfolioService {
             });
             const pageCount = Math.ceil(totalPortfolio / limit);
             return { portfolio, totalPortfolio, page, pageCount, limit };
-        } catch(error) {
+        } catch (error) {
             console.error("Error in getAllPortfolio:", error);
             throw error;
         }
@@ -83,7 +84,14 @@ export class PortfolioService {
             where: { id },
             include: { all: true },
         });
-        return portfolio;
+        if (portfolio) {
+            return portfolio;
+        } else {
+            throw new HttpException(
+                "Портфолио не найдено",
+                HttpStatus.NOT_FOUND
+            );
+        }
     }
 
     async updatePortfolio(
@@ -130,6 +138,7 @@ export class PortfolioService {
             }
         } catch (error) {
             console.log(error);
+            throw error;
         }
     }
 
@@ -138,10 +147,8 @@ export class PortfolioService {
             const portfolio = await this.portfolioRepository.findByPk(
                 portfolioId
             );
-
             if (portfolio) {
                 const user = req.user;
-
                 if (portfolio.userId === user.id) {
                     if (portfolio.image) {
                         await this.fileService.deleteFile(portfolio.image);
@@ -150,7 +157,6 @@ export class PortfolioService {
                         await this.fileService.deleteFile(portfolio.docs);
                     }
                     await portfolio.destroy();
-
                     return {
                         success: true,
                         message: "Портфолио успешно удалено",
@@ -168,7 +174,6 @@ export class PortfolioService {
                 );
             }
         } catch (error) {
-            console.log(error);
             throw new HttpException(
                 "Ошибка при удалении портфолио",
                 HttpStatus.INTERNAL_SERVER_ERROR

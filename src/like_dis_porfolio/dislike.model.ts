@@ -15,24 +15,24 @@ interface DislikeCreationAttrs {
     portfolioId: number;
 }
 
-@Table({ tableName: "portfolio_final_end_zalupa" })
-export class PortfolioDislike extends Model<
-    PortfolioDislike,
-    DislikeCreationAttrs
-> {
-    @Column({
-        type: DataType.INTEGER,
-        unique: true,
-        autoIncrement: true,
-        primaryKey: true,
-    })
-    id: number;
+// @Table({ tableName: "portfolio_dislikes_end" })
+// export class PortfolioDislike extends Model<
+//     PortfolioDislike,
+//     DislikeCreationAttrs
+// > {
+//     @Column({
+//         type: DataType.INTEGER,
+//         unique: true,
+//         autoIncrement: true,
+//         primaryKey: true,
+//     })
+//     id: number;
 
-    @ForeignKey(() => Portfolio)
-    @Column
-    portfolioId: number;
+//     @ForeignKey(() => Portfolio)
+//     @Column
+//     portfolioId: number;
 
-    @ForeignKey(() => User)
-    @Column
-    userId: number;
-}
+//     @ForeignKey(() => User)
+//     @Column
+//     userId: number;
+// }

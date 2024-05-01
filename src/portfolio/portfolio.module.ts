@@ -6,8 +6,8 @@ import { User } from "../users/users.model";
 import { Portfolio } from "./portfolio.model";
 import { FilesPortfolioModule } from "../files_portfolio/files_portfolio.module";
 import { AuthModule } from "../auth/auth.module";
-import { PortfolioLike } from "../like_dis_porfolio/like.model";
-import { PortfolioDislike } from "../like_dis_porfolio/dislike.model";
+// import { PortfolioLike } from "../like_dis_porfolio/like.model";
+// import { PortfolioDislike } from "../like_dis_porfolio/dislike.model";
 
 @Module({
     providers: [PortfolioService],
@@ -16,8 +16,8 @@ import { PortfolioDislike } from "../like_dis_porfolio/dislike.model";
         SequelizeModule.forFeature([
             User,
             Portfolio,
-            PortfolioLike,
-            PortfolioDislike,
+            // PortfolioLike,
+            // PortfolioDislike,
         ]),
         FilesPortfolioModule,
         forwardRef(() => AuthModule),

@@ -13,24 +13,24 @@ interface PortfolioLikeCreationAttrs {
     portfolioId: number;
 }
 
-@Table({ tableName: "portfolio_final_end_zalupa" })
-export class PortfolioLike extends Model<
-    PortfolioLike,
-    PortfolioLikeCreationAttrs
-> {
-    @Column({
-        type: DataType.INTEGER,
-        unique: true,
-        autoIncrement: true,
-        primaryKey: true,
-    })
-    id: number;
+// @Table({ tableName: "portfolio_likes_end" })
+// export class PortfolioLike extends Model<
+//     PortfolioLike,
+//     PortfolioLikeCreationAttrs
+// > {
+//     @Column({
+//         type: DataType.INTEGER,
+//         unique: true,
+//         autoIncrement: true,
+//         primaryKey: true,
+//     })
+//     id: number;
 
-    @ForeignKey(() => Portfolio)
-    @Column
-    portfolioId: number;
+//     @ForeignKey(() => Portfolio)
+//     @Column
+//     portfolioId: number;
 
-    @ForeignKey(() => User)
-    @Column
-    userId: number;
-}
+//     @ForeignKey(() => User)
+//     @Column
+//     userId: number;
+// }

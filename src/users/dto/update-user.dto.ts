@@ -22,7 +22,7 @@ export class UpdateUserDto {
     
     @ApiProperty({ example: "Математика, Информатика, Физика", description: "Предметы" })
     @IsString({ message: "Должно быть строкой" })
-    readonly categories?: string[] | null;
+    categories?: string[] | null;
     
     @ApiProperty({ example: "+************", description: "Способ связи" })
     @IsString({ message: "Должно быть строкой" })

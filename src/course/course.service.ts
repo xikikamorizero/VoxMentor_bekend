@@ -50,7 +50,7 @@ export class CoursesService {
             return { courses, totalCourses, page, pageCount, limit };
         } else {
             throw new NotFoundException(
-                "this course can only be viewed by subscribers of its creator"
+                "У вас нет доступа для получения этой информации."
             );
         }
     }
@@ -206,8 +206,7 @@ export class CoursesService {
             );
             if (isSubscribed || user.id == course.authorId) {
                 return course;
-            }
-            else{
+            } else {
                 throw new NotFoundException("нет доступа");
             }
         } else {
@@ -240,7 +239,9 @@ export class CoursesService {
         image: any
     ) {
         try {
-            const course = await this.courseRepository.findByPk(courseId);
+            const course = await this.courseRepository.findByPk(courseId, {
+                include: { all: true },
+            });
             if (course) {
                 const user = req.user;
                 if (course.authorId == user.id) {
