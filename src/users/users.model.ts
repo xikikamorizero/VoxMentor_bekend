@@ -15,14 +15,18 @@ import { Portfolio } from "src/portfolio/portfolio.model";
 import { Subscription } from "./user_follow.model";
 import { Like } from "../like_dis/like.model";
 import { Dislike } from "../like_dis/dislike.model";
+import { Award } from "../award/award.model";
+import { Publications } from "../publications/publications.model";
+import { Education } from "src/education/education.model";
+import { Traning } from "src/training/training.model";
 
 interface UserCreationAttrs {
     email: string;
     password: string;
-    image?:string | null;
+    image?: string | null;
 }
 
-@Table({ tableName: "users_end" })
+@Table({ tableName: "User" })
 export class User extends Model<User, UserCreationAttrs> {
     @ApiProperty({ example: "1", description: "Уникальный идентификатор" })
     @Column({
@@ -42,53 +46,94 @@ export class User extends Model<User, UserCreationAttrs> {
     @Exclude()
     password: string;
 
-    @ApiProperty({ example: "Кузнецов Сергей Константинович", description: "ФИО" })
+    @ApiProperty({
+        example: "Кузнецов Сергей Константинович",
+        description: "ФИО",
+    })
     @Column({ type: DataType.STRING })
-    name:string;
-
-    @ApiProperty({ example: "https://img.freepik.com/free-photo/a-picture-of-fireworks-with-a-road-in-the-background_1340-43363.jpg", description: "аватарка пользователя" })
-    @Column({ type: DataType.STRING, allowNull: true })
-    avatar:string;
-
-    @ApiProperty({ example: "Я профессор математических наук в МГУ", description: "Обо мне" })
-    @Column({ type: DataType.STRING, allowNull: true })
-    description:string;
-
-    @ApiProperty({ example: "НУУЗ", description: "Место работы пользователя" })
-    @Column({ type: DataType.STRING, allowNull: true })
-    place_of_work:string;
-
-    @ApiProperty({ example: "Профессор", description: "Научная степень" })
-    @Column({ type: DataType.STRING, allowNull: true})
-    science_degree:string;
-
-    @ApiProperty({ example: "Математика, Информатика, Физика", description: "Предметы" })
-    @Column({ type: DataType.ARRAY(DataType.STRING), allowNull: true })
-    categories:string[];
-
-    @ApiProperty({ example: "+************", description: "Способ связи" })
-    @Column({ type: DataType.STRING, allowNull: true})
-    contacts:string;
-
-    @ApiProperty({ example: "true", description: "Забанен или нет" })
-    @Column({ type: DataType.BOOLEAN, defaultValue: false })
-    banned: boolean;
+    name: string;
 
     @ApiProperty({
-        example: "За хулиганство",
-        description: "Причина блокировки",
+        example:
+            "https://img.freepik.com/free-photo/a-picture-of-fireworks-with-a-road-in-the-background_1340-43363.jpg",
+        description: "аватарка пользователя",
     })
     @Column({ type: DataType.STRING, allowNull: true })
-    banReason: string;
+    avatar: string;
+
+    @ApiProperty({
+        example: "Я профессор математических наук в МГУ",
+        description: "Обо мне",
+    })
+    @Column({ type: DataType.TEXT, allowNull: true })
+    description: string;
+    
+    @ApiProperty({ example: "НУУЗ", description: "Место работы пользователя" })
+    @Column({ type: DataType.STRING, allowNull: true })
+    place_of_work: string;
+
+    @ApiProperty({
+        example: "Associate Professor",
+        description: "Должность преподавателя",
+    })
+    @Column({ type: DataType.STRING, allowNull: true })
+    position: string;
+
+    @ApiProperty({ example: "Профессор", description: "Научная степень" })
+    @Column({ type: DataType.STRING, allowNull: true })
+    science_degree: string;
+
+    @ApiProperty({ example: "10", description: "Стаж работы в годах" })
+    @Column({ type: DataType.INTEGER, defaultValue: 0 })
+    yearsOfExperience: number;
+
+    @ApiProperty({
+        example: "Математика, Информатика, Физика",
+        description: "Предметы",
+    })
+    @Column({ type: DataType.ARRAY(DataType.STRING), allowNull: true })
+    categories: string[];
+
+    @ApiProperty({ example: "+************", description: "Способ связи" })
+    @Column({ type: DataType.STRING, allowNull: true })
+    contacts: string;
 
     @BelongsToMany(() => Role, () => UserRoles)
     roles: Role[];
 
+    @ApiProperty({ example: "10", description: "Стаж работы в годах" })
+    @Column({ type: DataType.INTEGER, defaultValue: 0 })
+    awardsCount: number;
+
+    @HasMany(() => Award)
+    awards: Award[];
+
+    @HasMany(() => Traning)
+    traning: Traning[];
+
+    @HasMany(() => Education)
+    education: Education[];
+
+    @ApiProperty({ example: "10", description: "Стаж работы в годах" })
+    @Column({ type: DataType.INTEGER, defaultValue: 0 })
+    publicationsCount: number;
+
+    @HasMany(() => Publications)
+    publications: Publications[];
+
+    @ApiProperty({ example: "10", description: "Стаж работы в годах" })
+    @Column({ type: DataType.INTEGER, defaultValue: 0 })
+    courseCount: number;
+
     @HasMany(() => Course)
     course: Course[];
 
+    @ApiProperty({ example: "10", description: "Стаж работы в годах" })
+    @Column({ type: DataType.INTEGER, defaultValue: 0 })
+    portfolioCount: number;
+
     @HasMany(() => Portfolio)
-    postfolio: Portfolio[];
+    portfolio: Portfolio[];
 
     @BelongsToMany(() => User, () => Subscription, "subscriberId", "authorId")
     subscriptions: User[];

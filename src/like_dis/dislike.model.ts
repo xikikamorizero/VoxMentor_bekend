@@ -12,7 +12,7 @@ interface DislikeCreationAttrs {
     dislikedUserId: number;
 }
 
-@Table({ tableName: "dislikes_end" })
+@Table({ tableName: "Dislike" })
 export class Dislike extends Model<Dislike, DislikeCreationAttrs> {
     @Column({ type: DataType.INTEGER, primaryKey: true, autoIncrement: true })
     id: number;

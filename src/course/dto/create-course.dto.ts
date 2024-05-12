@@ -18,6 +18,8 @@ export class CreateCourseDto {
     @IsString({message: "Должно быть строкой"})
     readonly category : string;
 
+    readonly year: number;
+
     @ApiProperty({example: 12, description: 'id Пользователя'})
     authorId?: number;
 }

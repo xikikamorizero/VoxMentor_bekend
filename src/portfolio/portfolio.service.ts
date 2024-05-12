@@ -4,37 +4,45 @@ import { InjectModel } from "@nestjs/sequelize";
 import { Portfolio } from "./portfolio.model";
 import { FilesPortfolioService } from "../files_portfolio/files_portfolio.service";
 import { Op } from "sequelize";
+import { User } from "src/users/users.model";
+import { error } from "console";
 
 @Injectable()
 export class PortfolioService {
     constructor(
         @InjectModel(Portfolio) private portfolioRepository: typeof Portfolio,
+        @InjectModel(User) private userRepository: typeof User,
         private fileService: FilesPortfolioService
     ) {}
 
     async create(req: any, dto: CreatePortfolioDto, image: any, docs: any) {
         try {
-            const user = req.user;
-            dto.userId = user.id;
-            console.log(user);
+            const User = await this.userRepository.findByPk(req.user.id);
 
-            let fileName = null;
-            if (image) {
-                fileName = await this.fileService.createFile(image);
+            if (User) {
+                dto.userId = User.id;
+                console.log(User);
+
+                let fileName = null;
+                if (image) {
+                    fileName = await this.fileService.createFile(image);
+                }
+
+                let fileDocsName = null;
+                if (docs) {
+                    fileDocsName = await this.fileService.createFile(docs);
+                }
+
+                const portfolio = await this.portfolioRepository.create({
+                    ...dto,
+                    image: fileName,
+                    docs: fileDocsName,
+                });
+                await User.increment("portfolioCount");
+                return portfolio;
+            } else {
+                throw error;
             }
-
-            let fileDocsName = null;
-            if (docs) {
-                fileDocsName = await this.fileService.createFile(docs);
-            }
-
-            const portfolio = await this.portfolioRepository.create({
-                ...dto,
-                image: fileName,
-                docs: fileDocsName,
-            });
-
-            return portfolio;
         } catch (error) {
             console.log("что-то пошло не так", error);
             throw error;
@@ -148,8 +156,8 @@ export class PortfolioService {
                 portfolioId
             );
             if (portfolio) {
-                const user = req.user;
-                if (portfolio.userId === user.id) {
+                const User = await this.userRepository.findByPk(req.user.id);
+                if (portfolio.userId === User.id) {
                     if (portfolio.image) {
                         await this.fileService.deleteFile(portfolio.image);
                     }
@@ -157,6 +165,8 @@ export class PortfolioService {
                         await this.fileService.deleteFile(portfolio.docs);
                     }
                     await portfolio.destroy();
+                    await User.decrement("portfolioCount");
+
                     return {
                         success: true,
                         message: "Портфолио успешно удалено",

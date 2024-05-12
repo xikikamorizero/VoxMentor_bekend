@@ -64,8 +64,18 @@ export class UsersController {
             filerDto.keyword,
             filerDto.place_of_work,
             filerDto.science_degree,
+            filerDto.yearsOfExperienceMin,
+            filerDto.yearsOfExperienceMax,
+            filerDto.awardMin,
+            filerDto.awardMax,
+            filerDto.publicationsMin,
+            filerDto.publicationsMax,
+            filerDto.portfolioMin,
+            filerDto.portfolioMax,
+            filerDto.courseMin,
+            filerDto.courseMax,
             filerDto.page,
-            filerDto.limit
+            filerDto.limit,
         );
     }
 
@@ -127,14 +137,6 @@ export class UsersController {
         return this.usersService.addRole(dto);
     }
 
-    @ApiOperation({ summary: "Забанить пользователя" })
-    @ApiResponse({ status: 200 })
-    @Roles("Admin")
-    @UseGuards(RolesGuard)
-    @Post("/ban")
-    ban(@Body() dto: BanUserDto) {
-        return this.usersService.ban(dto);
-    }
     // тесты
     @UseGuards(JwtAuthGuard)
     @Post("test/:id")

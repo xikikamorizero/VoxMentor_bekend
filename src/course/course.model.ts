@@ -18,7 +18,7 @@ interface CourseCreationAttrs {
     image: string;
 }
 
-@Table({ tableName: "courses" })
+@Table({ tableName: "Course" })
 export class Course extends Model<Course, CourseCreationAttrs> {
     @Column({
         type: DataType.INTEGER,
@@ -30,7 +30,7 @@ export class Course extends Model<Course, CourseCreationAttrs> {
 
     @Column({ type: DataType.STRING, allowNull: false })
     title: string;
-// Тут TEXT потому что будет принимать сгенерированый json из Editor js
+
     @Column({ type: DataType.TEXT })
     description: string;
 
@@ -49,6 +49,9 @@ export class Course extends Model<Course, CourseCreationAttrs> {
 
     @Column({ type: DataType.INTEGER, defaultValue: 0 })
     lessonCount: number;
+    
+    @Column({ type: DataType.INTEGER, defaultValue: 0 })
+    year:number;
 
     @HasMany(() => Lesson)
     lessons: Lesson[];

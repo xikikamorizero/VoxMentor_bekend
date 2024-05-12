@@ -6,7 +6,7 @@ interface LikeCreationAttrs {
   likedUserId: number;
 }
 
-@Table({ tableName: "likes_end" })
+@Table({ tableName: "Like" })
 export class Like extends Model<Like, LikeCreationAttrs> {
     @Column({ type: DataType.INTEGER, primaryKey: true, autoIncrement: true })
     id: number;

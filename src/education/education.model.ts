@@ -7,17 +7,15 @@ import {
 } from "sequelize-typescript";
 import { User } from "../users/users.model";
 
-interface PortfolioCreationAttrs {
+interface EducationCreationAttrs {
     title: string;
-    content: string;
-    userId: number;
-    image: string | null;
+    date: string;
+    image: string |null;
     docs: string | null;
-    year: number;
 }
 
-@Table({ tableName: "Portfolio" })
-export class Portfolio extends Model<Portfolio, PortfolioCreationAttrs> {
+@Table({ tableName: "Education" })
+export class Education extends Model<Education, EducationCreationAttrs> {
     @Column({
         type: DataType.INTEGER,
         unique: true,
@@ -29,23 +27,14 @@ export class Portfolio extends Model<Portfolio, PortfolioCreationAttrs> {
     @Column({ type: DataType.STRING, allowNull: false })
     title: string;
 
-    @Column({ type: DataType.TEXT, allowNull: false })
-    content: string;
+    @Column({ type: DataType.STRING, allowNull: false })
+    date:string;
 
-    @Column({ type: DataType.STRING, allowNull: true })
+    @Column({ type: DataType.STRING, allowNull: true})
     image: string;
 
     @Column({ type: DataType.STRING, allowNull: true })
     docs: string;
-
-    @Column({ type: DataType.STRING, allowNull: false })
-    category: string;
-
-    @Column({ type: DataType.STRING, allowNull: false })
-    type: string;
-    
-    @Column({ type: DataType.INTEGER, defaultValue: 0 })
-    year:number;
 
     @ForeignKey(() => User)
     @Column({ type: DataType.INTEGER })

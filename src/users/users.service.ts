@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import {
+    HttpException,
+    HttpStatus,
+    Injectable,
+    UnauthorizedException,
+} from "@nestjs/common";
 import { Op } from "sequelize";
 import { User } from "./users.model";
 import { InjectModel } from "@nestjs/sequelize";
@@ -12,6 +17,10 @@ import { UpdateUserDto } from "./dto/update-user.dto";
 import { Like } from "../like_dis/like.model";
 import { Dislike } from "../like_dis/dislike.model";
 import { FilesService } from "../files/files.service";
+import { Traning } from "../training/training.model";
+import { Award } from "src/award/award.model";
+import { Publications } from "src/publications/publications.model";
+import { Education } from "src/education/education.model";
 
 @Injectable()
 export default class UsersService {
@@ -85,15 +94,26 @@ export default class UsersService {
         keyword: string,
         placeOfWork: string,
         scienceDegree: string,
+        yearsOfExperienceMin: number,
+        yearsOfExperienceMax: number,
+        awardMin: number,
+        awardMax: number,
+        publicationsMin: number,
+        publicationsMax: number,
+        portfolioMin: number,
+        portfolioMax: number,
+        courseMin: number,
+        courseMax: number,
+
         page: number = 1,
         limit: number = 10
     ) {
         try {
             const offset = (page - 1) * limit;
+
             const whereClause: any = {};
 
             if (keyword) {
-                console.log(keyword);
                 whereClause.name = { [Op.iLike]: `%${keyword}%` };
             }
             if (placeOfWork) {
@@ -104,6 +124,62 @@ export default class UsersService {
                     [Op.iLike]: `%${scienceDegree}%`,
                 };
             }
+            if (yearsOfExperienceMin) {
+                whereClause.yearsOfExperience = {
+                    [Op.gte]: yearsOfExperienceMin,
+                };
+            }
+            if (yearsOfExperienceMax) {
+                whereClause.yearsOfExperience = {
+                    ...whereClause.yearsOfExperience,
+                    [Op.lte]: yearsOfExperienceMax,
+                };
+            }
+            if (awardMin) {
+                whereClause.awardsCount = {
+                    [Op.gte]: awardMin,
+                };
+            }
+            if (awardMax) {
+                whereClause.awardsCount = {
+                    ...whereClause.awardsCount,
+                    [Op.lte]: awardMax,
+                };
+            }
+            if (publicationsMin) {
+                whereClause.publicationsCount = {
+                    [Op.gte]: publicationsMin,
+                };
+            }
+            if (publicationsMax) {
+                whereClause.publicationsCount = {
+                    ...whereClause.publicationsCount,
+                    [Op.lte]: publicationsMax,
+                };
+            }
+            if (portfolioMin) {
+                whereClause.portfolioCount = {
+                    [Op.gte]: portfolioMin,
+                };
+            }
+            if (portfolioMax) {
+                whereClause.portfolioCount = {
+                    ...whereClause.portfolioCount,
+                    [Op.lte]: portfolioMax,
+                };
+            }
+            if (courseMin) {
+                whereClause.courseCount = {
+                    [Op.gte]: courseMin,
+                };
+            }
+            if (courseMax) {
+                whereClause.courseCount = {
+                    ...whereClause.courseCount,
+                    [Op.lte]: courseMax,
+                };
+            }
+
 
             const users = await this.userRepository.findAll({
                 where: whereClause,
@@ -141,7 +217,7 @@ export default class UsersService {
 
             if (user) {
                 return {
-                    portfolio: user.postfolio ? user.postfolio : [],
+                    portfolio: user.portfolio ? user.portfolio : [],
                     course: user.course ? user.course : [],
                 };
             } else {
@@ -218,12 +294,34 @@ export default class UsersService {
     }
 
     async getUserById(id: number) {
-        const user = await this.userRepository.findOne({
-            where: { id },
-            attributes: { exclude: ["password"] },
-            include: [{ all: true, attributes: { exclude: ["password"] } }],
-        });
-        return user;
+        try {
+            const user = await this.userRepository.findByPk(id, {
+                attributes: { exclude: ["password"] },
+                include: [
+                    { all: true, attributes: { exclude: ["password"] } },
+                    {
+                        model: Traning,
+                        attributes: { exclude: ["password"] },
+                        order: [["id", "ASC"]],
+                    },
+                    { model: Award, attributes: { exclude: ["password"] } },
+                    {
+                        model: Publications,
+                        attributes: { exclude: ["password"] },
+                    },
+                    {
+                        model: Education,
+                        attributes: { exclude: ["password"] },
+                    },
+                ],
+            });
+            return user;
+        } catch (error) {
+            throw new HttpException(
+                "пользователь не найден",
+                HttpStatus.NOT_FOUND
+            );
+        }
     }
 
     async getProfile(req: any) {
@@ -231,11 +329,35 @@ export default class UsersService {
             const userId = req.user.id;
             const user = await this.userRepository.findByPk(userId, {
                 attributes: { exclude: ["password"] },
-                include: [{ all: true, attributes: { exclude: ["password"] } }],
+                include: [
+                    { all: true, attributes: { exclude: ["password"] } },
+                    {
+                        model: Traning,
+                        attributes: { exclude: ["password"] },
+                        order: [["id", "ASC"]],
+                    },
+                    { model: Award, attributes: { exclude: ["password"] } },
+                    {
+                        model: Publications,
+                        attributes: { exclude: ["password"] },
+                    },
+                    {
+                        model: Education,
+                        attributes: { exclude: ["password"] },
+                    },
+                ],
             });
-            return user;
+            if (user) {
+                return user;
+            } else {
+                throw new UnauthorizedException({
+                    message: "Пользователь не авторизован",
+                });
+            }
         } catch (error) {
-            console.log("тут ошибка");
+            throw new UnauthorizedException({
+                message: "Пользователь не авторизован",
+            });
         }
     }
 
@@ -247,17 +369,6 @@ export default class UsersService {
             return dto;
         }
         throw new HttpException("User or role not found", HttpStatus.NOT_FOUND);
-    }
-
-    async ban(dto: BanUserDto) {
-        const user = await this.userRepository.findByPk(dto.userId);
-        if (!user) {
-            throw new HttpException("User is not found", HttpStatus.NOT_FOUND);
-        }
-        user.banned = true;
-        user.banReason = dto.banReason;
-        await user.save();
-        return user;
     }
 
     async getAllCourseByAuthorId(authorId: number) {

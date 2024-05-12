@@ -1,22 +1,22 @@
 import { Module, forwardRef } from "@nestjs/common";
-import { PortfolioService } from "./portfolio.service";
-import { PortfolioController } from "./portfolio.controller";
+import { AwardService } from "./award.service";
+import { AwardController } from "./award.controller";
 import { SequelizeModule } from "@nestjs/sequelize";
 import { User } from "../users/users.model";
-import { Portfolio } from "./portfolio.model";
+import { Award } from "./award.model";
 import { FilesPortfolioModule } from "../files_portfolio/files_portfolio.module";
 import { AuthModule } from "../auth/auth.module";
 
 @Module({
-    providers: [PortfolioService],
-    controllers: [PortfolioController],
+    providers: [AwardService],
+    controllers: [AwardController],
     imports: [
         SequelizeModule.forFeature([
             User,
-            Portfolio,
+            Award,
         ]),
         FilesPortfolioModule,
         forwardRef(() => AuthModule),
     ],
 })
-export class PortfolioModule {}
+export class AwardModule {}

@@ -1,7 +1,7 @@
 import { Column, Table, Model, ForeignKey, BelongsTo } from 'sequelize-typescript';
 import { User } from './users.model';
 
-@Table({ tableName: 'subscriptions_end' })
+@Table({ tableName: 'Subscription' })
 export class Subscription extends Model<Subscription> {
   @Column
   subscriberId: number;

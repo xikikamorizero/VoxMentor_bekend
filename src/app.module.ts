@@ -19,6 +19,14 @@ import { PortfolioModule } from "./portfolio/portfolio.module";
 import { Subscription } from "./users/user_follow.model";
 import { Like } from "./like_dis/like.model";
 import { Dislike } from "./like_dis/dislike.model";
+import { Award } from "./award/award.model";
+import { AwardModule } from "./award/award.module";
+import { Publications } from "./publications/publications.model";
+import { PublicationsModule } from "./publications/publications.module";
+import { Traning } from "./training/training.model";
+import { TraningModule } from "./training/training.module";
+import { Education } from "./education/education.model";
+import { EducationModule } from "./education/education.module";
 
 @Module({
     controllers: [],
@@ -47,6 +55,10 @@ import { Dislike } from "./like_dis/dislike.model";
                 Course,
                 Lesson,
                 Portfolio,
+                Award,
+                Publications,
+                Traning,
+                Education
             ],
             autoLoadModels: true,
         }),
@@ -57,6 +69,10 @@ import { Dislike } from "./like_dis/dislike.model";
         CourseModule,
         LessonModule,
         PortfolioModule,
+        AwardModule,
+        PublicationsModule, 
+        TraningModule,
+        EducationModule
     ],
 })
 export class AppModule {}

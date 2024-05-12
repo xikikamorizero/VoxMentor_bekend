@@ -12,7 +12,7 @@ interface LessonCreationAttrs {
   reading_materials : string[];
 }
 
-@Table({ tableName: 'lessons'})
+@Table({ tableName: 'Lesson'})
 export class Lesson extends Model<Lesson, LessonCreationAttrs> {
   @Column({ type: DataType.INTEGER, unique: true, autoIncrement: true, primaryKey: true })
   id: number;
@@ -23,7 +23,7 @@ export class Lesson extends Model<Lesson, LessonCreationAttrs> {
   @Column({ type: DataType.TEXT, allowNull: true })
   content: string;
 
-  @Column({ type: DataType.STRING, allowNull: true })
+  @Column({ type: DataType.TEXT, allowNull: true })
   description: string;
 
   @Column({ type: DataType.STRING })

@@ -10,11 +10,14 @@ import { InjectModel } from "@nestjs/sequelize";
 import { FilesService } from "../files/files.service";
 import { Sequelize } from "sequelize";
 import UsersService from "../users/users.service";
+import { User } from "src/users/users.model";
+import { error } from "console";
 
 @Injectable()
 export class CoursesService {
     constructor(
         @InjectModel(Course) private courseRepository: typeof Course,
+        @InjectModel(User) private userRepository: typeof User,
         private fileService: FilesService,
         private usersService: UsersService
     ) {}
@@ -216,19 +219,26 @@ export class CoursesService {
 
     async createCourse(dto: CreateCourseDto, image: any, req: any) {
         try {
-            const user = req.user;
-            dto.authorId = user.id;
-            let fileName = null;
-            if (image) {
-                fileName = await this.fileService.createFile(image);
+            const User = await this.userRepository.findByPk(req.user.id);
+            if(User){
+                dto.authorId = User.id;
+                let fileName = null;
+                if (image) {
+                    fileName = await this.fileService.createFile(image);
+                }
+                const course = await this.courseRepository.create({
+                    ...dto,
+                    image: fileName,
+                });
+                await User.increment("courseCount");
+                return course;
             }
-            const course = await this.courseRepository.create({
-                ...dto,
-                image: fileName,
-            });
-            return course;
-        } catch (error) {
-            console.log("что за хуйня ?");
+            else{
+                throw new NotFoundException("user not found");
+            }
+            
+        } catch{
+            throw error;
         }
     }
 
@@ -274,9 +284,10 @@ export class CoursesService {
         try {
             const course = await this.courseRepository.findByPk(courseId);
             if (course) {
-                const user = req.user;
-                if (user.id == course.authorId) {
+                const User = await this.userRepository.findByPk(req.user.id);
+                if (User.id == course.authorId) {
                     await course.destroy();
+                    await User.decrement("courseCount");
                     return {
                         success: true,
                         message: "Course successfully deleted",
