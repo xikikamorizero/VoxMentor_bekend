@@ -6,6 +6,7 @@ import { User } from "../users/users.model";
 import { Portfolio } from "./portfolio.model";
 import { FilesPortfolioModule } from "../files_portfolio/files_portfolio.module";
 import { AuthModule } from "../auth/auth.module";
+import { Type } from "src/type_portfolio/types.model";
 
 @Module({
     providers: [PortfolioService],
@@ -14,6 +15,7 @@ import { AuthModule } from "../auth/auth.module";
         SequelizeModule.forFeature([
             User,
             Portfolio,
+            Type
         ]),
         FilesPortfolioModule,
         forwardRef(() => AuthModule),

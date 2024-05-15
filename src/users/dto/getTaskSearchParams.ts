@@ -12,6 +12,7 @@ export class GetTaskSearchParams {
     portfolioMax: number;
     courseMin: number;
     courseMax: number;
+    category:string[];
     page: number;
     limit: number;
 }

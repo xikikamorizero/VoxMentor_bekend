@@ -6,11 +6,13 @@ import { FilesPortfolioService } from "../files_portfolio/files_portfolio.servic
 import { Op } from "sequelize";
 import { User } from "src/users/users.model";
 import { error } from "console";
+import { Type } from "src/type_portfolio/types.model";
 
 @Injectable()
 export class PortfolioService {
     constructor(
         @InjectModel(Portfolio) private portfolioRepository: typeof Portfolio,
+        @InjectModel(Type) private typeRepository: typeof Type,
         @InjectModel(User) private userRepository: typeof User,
         private fileService: FilesPortfolioService
     ) {}
@@ -18,9 +20,10 @@ export class PortfolioService {
     async create(req: any, dto: CreatePortfolioDto, image: any, docs: any) {
         try {
             const User = await this.userRepository.findByPk(req.user.id);
-
-            if (User) {
+            const Type = await this.typeRepository.findByPk(dto.typeId);
+            if (User && Type) {
                 dto.userId = User.id;
+                dto.type = Type;
                 console.log(User);
 
                 let fileName = null;
@@ -52,7 +55,7 @@ export class PortfolioService {
     async getAllPortfolio(
         keyword: string,
         category: string,
-        type: string,
+        typeId: number,
         page: number = 1,
         limit: number = 10
     ) {
@@ -65,10 +68,8 @@ export class PortfolioService {
             if (category) {
                 whereClause.category = { [Op.iLike]: `%${category}%` };
             }
-            if (type) {
-                whereClause.type = {
-                    [Op.iLike]: `%${type}%`,
-                };
+            if (typeId) {
+                whereClause.typeId = typeId;
             }
             const portfolio = await this.portfolioRepository.findAll({
                 where: whereClause,
@@ -131,7 +132,11 @@ export class PortfolioService {
                         image: fileName,
                         docs: fileDocsName,
                     });
-                    return portfolio;
+                    const portfolioupd = await this.portfolioRepository.findOne({
+                        where: { id:portfolioId },
+                        include: { all: true },
+                    });
+                    return portfolioupd;
                 } else {
                     throw new HttpException(
                         "Вы не являетесь автором",

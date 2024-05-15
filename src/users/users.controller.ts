@@ -11,6 +11,9 @@ import {
     UseInterceptors,
     Request,
     Put,
+    Req,
+    ParseArrayPipe,
+    Optional,
 } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import UsersService from "./users.service";
@@ -58,25 +61,32 @@ export class UsersController {
     @ApiResponse({ status: 200, type: [User] })
     // @Roles("User")
     @UseGuards(RolesGuard)
-    @Get("professor")
-    getAllProfessor(@Query() filerDto: GetTaskSearchParams) {
+    @Get("/professor")
+    getAllProfessor(@Query() filterDto: GetTaskSearchParams) {
         return this.usersService.getAllUsersByRoleProfessor(
-            filerDto.keyword,
-            filerDto.place_of_work,
-            filerDto.science_degree,
-            filerDto.yearsOfExperienceMin,
-            filerDto.yearsOfExperienceMax,
-            filerDto.awardMin,
-            filerDto.awardMax,
-            filerDto.publicationsMin,
-            filerDto.publicationsMax,
-            filerDto.portfolioMin,
-            filerDto.portfolioMax,
-            filerDto.courseMin,
-            filerDto.courseMax,
-            filerDto.page,
-            filerDto.limit,
+            filterDto.keyword,
+            filterDto.place_of_work,
+            filterDto.science_degree,
+            filterDto.yearsOfExperienceMin,
+            filterDto.yearsOfExperienceMax,
+            filterDto.awardMin,
+            filterDto.awardMax,
+            filterDto.publicationsMin,
+            filterDto.publicationsMax,
+            filterDto.portfolioMin,
+            filterDto.portfolioMax,
+            filterDto.courseMin,
+            filterDto.courseMax,
+            filterDto.category,
+            filterDto.page,
+            filterDto.limit
         );
+    }
+
+    @Get("/test")
+    getAllProfess(@Query() filterDto: GetTaskSearchParams) {
+        const d:Array<{ typeId: number, min: number, max: number }> = [{ typeId: 1, min: 1, max: 10 }];
+        return this.usersService.test();
     }
 
     @ApiOperation({ summary: "Получить пользователя по id" })

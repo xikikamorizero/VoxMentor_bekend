@@ -27,6 +27,8 @@ import { Traning } from "./training/training.model";
 import { TraningModule } from "./training/training.module";
 import { Education } from "./education/education.model";
 import { EducationModule } from "./education/education.module";
+import { Type } from "./type_portfolio/types.model";
+import { TypesModule } from "./type_portfolio/types.module";
 
 @Module({
     controllers: [],
@@ -58,7 +60,8 @@ import { EducationModule } from "./education/education.module";
                 Award,
                 Publications,
                 Traning,
-                Education
+                Education,
+                Type
             ],
             autoLoadModels: true,
         }),
@@ -72,7 +75,8 @@ import { EducationModule } from "./education/education.module";
         AwardModule,
         PublicationsModule, 
         TraningModule,
-        EducationModule
+        EducationModule,
+        TypesModule
     ],
 })
 export class AppModule {}

@@ -4,7 +4,7 @@ import {
     Injectable,
     UnauthorizedException,
 } from "@nestjs/common";
-import { Op } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 import { User } from "./users.model";
 import { InjectModel } from "@nestjs/sequelize";
 import { CreateUserDto } from "./dto/create-user.dto";
@@ -21,11 +21,13 @@ import { Traning } from "../training/training.model";
 import { Award } from "src/award/award.model";
 import { Publications } from "src/publications/publications.model";
 import { Education } from "src/education/education.model";
+import { Portfolio } from "src/portfolio/portfolio.model";
 
 @Injectable()
 export default class UsersService {
     constructor(
         @InjectModel(User) private userRepository: typeof User,
+        @InjectModel(Portfolio) private portfolioRepository: typeof Portfolio,
         @InjectModel(Subscription)
         private subscriptionRepository: typeof Subscription,
         @InjectModel(Like)
@@ -104,6 +106,7 @@ export default class UsersService {
         portfolioMax: number,
         courseMin: number,
         courseMax: number,
+        category: string[] | string,
 
         page: number = 1,
         limit: number = 10
@@ -113,22 +116,19 @@ export default class UsersService {
 
             const whereClause: any = {};
 
-            if (keyword) {
-                whereClause.name = { [Op.iLike]: `%${keyword}%` };
-            }
-            if (placeOfWork) {
+            if (keyword) whereClause.name = { [Op.iLike]: `%${keyword}%` };
+            if (placeOfWork)
                 whereClause.place_of_work = { [Op.iLike]: `%${placeOfWork}%` };
-            }
-            if (scienceDegree) {
+            if (scienceDegree)
                 whereClause.science_degree = {
                     [Op.iLike]: `%${scienceDegree}%`,
                 };
-            }
-            if (yearsOfExperienceMin) {
+
+            if (yearsOfExperienceMin)
                 whereClause.yearsOfExperience = {
                     [Op.gte]: yearsOfExperienceMin,
                 };
-            }
+
             if (yearsOfExperienceMax) {
                 whereClause.yearsOfExperience = {
                     ...whereClause.yearsOfExperience,
@@ -180,6 +180,14 @@ export default class UsersService {
                 };
             }
 
+            if (category && category.length > 0) {
+                let categoryArray = Array.isArray(category)
+                    ? category
+                    : [category];
+                whereClause.categories = {
+                    [Op.contains]: categoryArray,
+                };
+            }
 
             const users = await this.userRepository.findAll({
                 where: whereClause,
@@ -206,6 +214,29 @@ export default class UsersService {
             throw error;
         }
     }
+
+    //
+
+    async test() {
+        try {
+            const a=Sequelize.literal(`COUNT("portfolio"."id") >= ${0} AND COUNT("portfolio"."id") <= ${0}`) 
+            const users = await User.findAll({
+                include: [{
+                    model: Portfolio,
+                    as: 'portfolio',
+                    where: { typeId: 2 },
+                    required: false
+                }],
+                group: ['User.id', 'portfolio.id'],
+                having: a
+            });
+            return users;
+        } catch (error) {
+            throw new Error(`Error fetching users: ${error}`);
+        }
+    }
+
+    //
 
     async getMyProject(req: any) {
         try {
@@ -260,6 +291,7 @@ export default class UsersService {
                         updateUserDto.categories = [updateUserDto.categories];
                     }
                 }
+
                 await user.update(updateUserDto);
                 return user;
             } else {

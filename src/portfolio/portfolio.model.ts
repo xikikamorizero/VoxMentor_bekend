@@ -4,8 +4,11 @@ import {
     ForeignKey,
     Model,
     Table,
+    BelongsTo
 } from "sequelize-typescript";
 import { User } from "../users/users.model";
+import { Type } from "../type_portfolio/types.model";
+import { PortfolioTypes } from "../type_portfolio/portfolio-types.model";
 
 interface PortfolioCreationAttrs {
     title: string;
@@ -41,11 +44,12 @@ export class Portfolio extends Model<Portfolio, PortfolioCreationAttrs> {
     @Column({ type: DataType.STRING, allowNull: false })
     category: string;
 
-    @Column({ type: DataType.STRING, allowNull: false })
-    type: string;
-    
-    @Column({ type: DataType.INTEGER, defaultValue: 0 })
-    year:number;
+    @ForeignKey(() => Type)
+    @Column({ type: DataType.INTEGER })
+    typeId: number;
+
+    @BelongsTo(() => Type)
+    type: Type;
 
     @ForeignKey(() => User)
     @Column({ type: DataType.INTEGER })

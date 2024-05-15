@@ -49,7 +49,7 @@ export class PortfolioController {
         return this.portfolioService.getAllPortfolio(
             filerDto.keyword,
             filerDto.category,
-            filerDto.type,
+            filerDto.typeId,
             filerDto.page,
             filerDto.limit
         );

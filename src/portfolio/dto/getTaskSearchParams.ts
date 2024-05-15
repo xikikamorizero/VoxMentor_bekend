@@ -3,7 +3,7 @@ import { IsNotEmpty } from "class-validator";
 export class GetTaskSearchParams {
     keyword:string;
     category: string;
-    type: string;
+    typeId: number;
     page: number;
     limit: number;
 }
