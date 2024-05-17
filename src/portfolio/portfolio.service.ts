@@ -24,7 +24,6 @@ export class PortfolioService {
             if (User && Type) {
                 dto.userId = User.id;
                 dto.type = Type;
-                console.log(User);
 
                 let fileName = null;
                 if (image) {
@@ -41,6 +40,7 @@ export class PortfolioService {
                     image: fileName,
                     docs: fileDocsName,
                 });
+                await Type.increment('count')
                 await User.increment("portfolioCount");
                 return portfolio;
             } else {
@@ -71,17 +71,14 @@ export class PortfolioService {
             if (typeId) {
                 whereClause.typeId = typeId;
             }
-            const portfolio = await this.portfolioRepository.findAll({
+            const {count, rows: portfolio} = await this.portfolioRepository.findAndCountAll({
                 where: whereClause,
                 include: { all: true },
                 offset,
                 limit,
             });
-            const totalPortfolio = await this.portfolioRepository.count({
-                where: whereClause,
-            });
-            const pageCount = Math.ceil(totalPortfolio / limit);
-            return { portfolio, totalPortfolio, page, pageCount, limit };
+            const pageCount = Math.ceil(count / limit);
+            return { portfolio, count, page, pageCount, limit };
         } catch (error) {
             console.error("Error in getAllPortfolio:", error);
             throw error;
@@ -160,6 +157,7 @@ export class PortfolioService {
             const portfolio = await this.portfolioRepository.findByPk(
                 portfolioId
             );
+            const Type = await this.typeRepository.findByPk(portfolio.typeId);
             if (portfolio) {
                 const User = await this.userRepository.findByPk(req.user.id);
                 if (portfolio.userId === User.id) {
@@ -170,6 +168,7 @@ export class PortfolioService {
                         await this.fileService.deleteFile(portfolio.docs);
                     }
                     await portfolio.destroy();
+                    await Type.decrement('count')
                     await User.decrement("portfolioCount");
 
                     return {

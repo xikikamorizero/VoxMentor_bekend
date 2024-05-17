@@ -1,51 +1,65 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, HttpException, HttpStatus } from "@nestjs/common";
 import { CreateDto } from "./dto/create-type.dto";
 import { InjectModel } from "@nestjs/sequelize";
 import { Type } from "./types.model";
+import { error } from "console";
+import { User } from "src/users/users.model";
 
 @Injectable()
 export class TypesService {
-    constructor(@InjectModel(Type) private typeRepository: typeof Type) {}
+    constructor(
+        @InjectModel(Type) private typeRepository: typeof Type,
+        @InjectModel(User) private userRepository: typeof User
+    ) {}
 
-    async create(dto: CreateDto) {
-        console.log("Я сделяль");
-        const role = await this.typeRepository.create(dto);
-        return role;
+    async create(req: any, dto: CreateDto) {
+        try {
+            const user = await this.userRepository.findByPk(req.user.id);
+            if (user) {
+                dto.userId = user.id;
+                const type = await this.typeRepository.create(dto);
+                return type;
+            } else {
+                throw new HttpException("not found", HttpStatus.NOT_FOUND);
+            }
+        } catch {
+            throw error;
+        }
     }
 
-    async getByValue(value: string) {
-        const role = await this.typeRepository.findOne({ where: { value } });
-        return role;
+    async getByValue(id: string) {
+        const types = await this.typeRepository.findOne({ where: { id } });
+        return types;
     }
 
-    async edit(id: number, dto:Partial<CreateDto>) {
-        const role = await this.typeRepository.findByPk(id);
-        if(role){
-            await role.update({
-              ...dto
+    async edit(id: number, dto: Partial<CreateDto>) {
+        const type = await this.typeRepository.findByPk(id);
+        if (type) {
+            await type.update({
+                ...dto,
             });
         }
-        return role;
+        return type;
     }
 
     async delete(id: number) {
-        const role = await this.typeRepository.findByPk(id);
-        if(role){
-            await role.destroy();
+        const types = await this.typeRepository.findByPk(id);
+        if (types) {
+            await types.destroy();
+            return { success: true };
+        } else {
+            throw new HttpException("not found", HttpStatus.NOT_FOUND);
         }
-        return role;
     }
 
-
     async getAll() {
-        const role: any = await this.typeRepository.findAll({
+        const types: any = await this.typeRepository.findAll({
             include: {
                 all: true,
-                attributes: {
-                    exclude: ["password"],
-                },
             },
+            order: [["id", "ASC"]],
         });
-        return role;
+
+        return types;
     }
 }

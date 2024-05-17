@@ -19,6 +19,7 @@ import { Award } from "../award/award.model";
 import { Publications } from "../publications/publications.model";
 import { Education } from "src/education/education.model";
 import { Traning } from "src/training/training.model";
+import { v4 as uuidv4 } from 'uuid';
 
 interface UserCreationAttrs {
     email: string;
