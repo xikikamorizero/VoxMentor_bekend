@@ -14,6 +14,8 @@ import {
     Req,
     ParseArrayPipe,
     Optional,
+    HttpException,
+    HttpStatus,
 } from "@nestjs/common";
 import { CreateUserDto } from "./dto/create-user.dto";
 import UsersService from "./users.service";
@@ -77,15 +79,24 @@ export class UsersController {
             filterDto.portfolioMax,
             filterDto.courseMin,
             filterDto.courseMax,
+            filterDto.likesMin,
+            filterDto.likesMax,
+            filterDto.dislikesMin,
+            filterDto.dislikesMax,
             filterDto.category,
             filterDto.page,
-            filterDto.limit
+            filterDto.limit,
+
+            filterDto.sortBy,
+            filterDto.sortOrder
         );
     }
 
     @Get("/test")
     getAllProfess(@Query() filterDto: GetTaskSearchParams) {
-        const d:Array<{ typeId: number, min: number, max: number }> = [{ typeId: 1, min: 1, max: 10 }];
+        const d: Array<{ typeId: number; min: number; max: number }> = [
+            { typeId: 1, min: 1, max: 10 },
+        ];
         return this.usersService.test();
     }
 
@@ -159,14 +170,14 @@ export class UsersController {
     @Post("subscribe/:id")
     subscribe(@Request() req, @Param("id") authorId: number) {
         const subscriberId = req.user.id;
-        return this.usersService.subscribe(subscriberId, authorId);
+        return this.usersService.subscribe(subscriberId, String(authorId));
     }
 
     @UseGuards(JwtAuthGuard)
     @Delete("unsubscribe/:id")
     unsubscribe(@Request() req, @Param("id") authorId: number) {
         const subscriberId = req.user.id;
-        return this.usersService.unsubscribe(subscriberId, authorId);
+        return this.usersService.unsubscribe(subscriberId, String(authorId));
     }
 
     @UseGuards(JwtAuthGuard)
@@ -188,14 +199,14 @@ export class UsersController {
     @Post("like/:id")
     likeUser(@Request() req, @Param("id") likedUserId: number) {
         const userId = req.user.id;
-        return this.usersService.like(userId, likedUserId);
+        return this.usersService.like(userId, String(likedUserId));
     }
 
     @UseGuards(JwtAuthGuard)
     @Delete("unlike/:id")
     unlikeUser(@Request() req, @Param("id") likedUserId: number) {
         const userId = req.user.id;
-        return this.usersService.unlike(userId, likedUserId);
+        return this.usersService.unlike(userId, String(likedUserId));
     }
 
     @UseGuards(JwtAuthGuard)
@@ -209,14 +220,14 @@ export class UsersController {
     @Post("dislike/:id")
     dislikeUser(@Request() req, @Param("id") dislikedUserId: number) {
         const userId = req.user.id;
-        return this.usersService.dislike(userId, dislikedUserId);
+        return this.usersService.dislike(userId, String(dislikedUserId));
     }
 
     @UseGuards(JwtAuthGuard)
     @Delete("undislike/:id")
     undislikeUser(@Request() req, @Param("id") dislikedUserId: number) {
         const userId = req.user.id;
-        return this.usersService.undislike(userId, dislikedUserId);
+        return this.usersService.undislike(userId, String(dislikedUserId));
     }
 
     @UseGuards(JwtAuthGuard)

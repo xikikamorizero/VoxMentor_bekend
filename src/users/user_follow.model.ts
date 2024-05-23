@@ -4,11 +4,11 @@ import { User } from './users.model';
 @Table({ tableName: 'Subscription' })
 export class Subscription extends Model<Subscription> {
   @Column
-  subscriberId: number;
+  subscriberId: string;
 
   @ForeignKey(() => User)
   @Column
-  authorId: number;
+  authorId: string;
 
   @BelongsTo(() => User, 'authorId')
   author: User;

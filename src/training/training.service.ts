@@ -99,10 +99,10 @@ export class TraningService {
             if (traning) {
                 const user = req.user;
                 if (traning.userId == user.id) {
-                    let fileName = traning.image;
-                    if (image) {
-                        fileName = await this.fileService.createFile(image);
-                    }
+                    // let fileName = traning.image;
+                    // if (image) {
+                    //     fileName = await this.fileService.createFile(image);
+                    // }
 
                     let fileDocsName = traning.docs;
                     if (docs) {
@@ -110,7 +110,7 @@ export class TraningService {
                     }
                     await traning.update({
                         ...updateDto,
-                        image: fileName,
+                        // image: fileName,
                         docs: fileDocsName,
                     });
                     return traning;
@@ -139,9 +139,9 @@ export class TraningService {
             if (traning) {
                 const user = req.user;
                 if (traning.userId === user.id) {
-                    if (traning.image) {
-                        await this.fileService.deleteFile(traning.image);
-                    }
+                    // if (traning.image) {
+                    //     await this.fileService.deleteFile(traning.image);
+                    // }
                     if (traning.docs) {
                         await this.fileService.deleteFile(traning.docs);
                     }

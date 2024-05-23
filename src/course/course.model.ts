@@ -44,8 +44,8 @@ export class Course extends Model<Course, CourseCreationAttrs> {
     image: string;
 
     @ForeignKey(() => User)
-    @Column({ type: DataType.INTEGER })
-    authorId: number;
+    @Column({ type: DataType.UUID})
+    authorId: string;
 
     @Column({ type: DataType.INTEGER, defaultValue: 0 })
     lessonCount: number;

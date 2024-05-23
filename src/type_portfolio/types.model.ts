@@ -8,8 +8,6 @@ import {
     BeforeSave
 } from "sequelize-typescript";
 import { ApiProperty } from "@nestjs/swagger";
-import { Portfolio } from "../portfolio/portfolio.model";
-import { PortfolioTypes } from "./portfolio-types.model";
 import { User } from "../users/users.model";
 
 interface TypeCreationAttrs {
@@ -47,8 +45,8 @@ export class Type extends Model<Type, TypeCreationAttrs> {
     count: number;
 
     @ForeignKey(() => User)
-    @Column({ type: DataType.INTEGER })
-    userId: number;
+    @Column({ type: DataType.UUID })
+    userId: string;
 
     @ApiProperty({ example: "", description: "Описание типа" })
     @Column({ type: DataType.STRING, allowNull: false })

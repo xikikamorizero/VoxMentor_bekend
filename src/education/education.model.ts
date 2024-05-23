@@ -37,6 +37,6 @@ export class Education extends Model<Education, EducationCreationAttrs> {
     docs: string;
 
     @ForeignKey(() => User)
-    @Column({ type: DataType.INTEGER })
-    userId: number;
+    @Column({ type: DataType.UUID })
+    userId: string;
 }

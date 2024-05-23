@@ -31,12 +31,11 @@ interface UserCreationAttrs {
 export class User extends Model<User, UserCreationAttrs> {
     @ApiProperty({ example: "1", description: "Уникальный идентификатор" })
     @Column({
-        type: DataType.INTEGER,
-        unique: true,
-        autoIncrement: true,
+        type: DataType.UUID,
+        defaultValue: DataType.UUIDV4,
         primaryKey: true,
     })
-    id: number;
+    id: string;
 
     @ApiProperty({ example: "user@mail.ru", description: "Почтовый адрес" })
     @Column({ type: DataType.STRING, unique: true, allowNull: false })

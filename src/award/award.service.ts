@@ -49,7 +49,7 @@ export class AwardService {
 
     async getAllAwardByUserId(
         req: any,
-        authorId: number,
+        authorId: string,
         page: number = 1,
         limit: number = 10
     ) {

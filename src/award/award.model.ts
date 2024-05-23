@@ -10,8 +10,8 @@ import { User } from "../users/users.model";
 interface AwardCreationAttrs {
     title: string;
     year: number;
-    type:string;
-    image: string |null;
+    type: string;
+    image: string | null;
     docs: string | null;
 }
 
@@ -29,9 +29,9 @@ export class Award extends Model<Award, AwardCreationAttrs> {
     title: string;
 
     @Column({ type: DataType.INTEGER, defaultValue: 0 })
-    year:number;
+    year: number;
 
-    @Column({ type: DataType.STRING, allowNull: true})
+    @Column({ type: DataType.STRING, allowNull: true })
     image: string;
 
     @Column({ type: DataType.STRING, allowNull: true })
@@ -41,6 +41,6 @@ export class Award extends Model<Award, AwardCreationAttrs> {
     type: string;
 
     @ForeignKey(() => User)
-    @Column({ type: DataType.INTEGER })
-    userId: number;
+    @Column({ type: DataType.UUID })
+    userId: string;
 }

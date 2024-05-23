@@ -40,7 +40,7 @@ export class PortfolioService {
                     image: fileName,
                     docs: fileDocsName,
                 });
-                await Type.increment('count')
+                await Type.increment("count");
                 await User.increment("portfolioCount");
                 return portfolio;
             } else {
@@ -57,7 +57,9 @@ export class PortfolioService {
         category: string,
         typeId: number,
         page: number = 1,
-        limit: number = 10
+        limit: number = 10,
+        sortBy: string = "createdAt",
+        sortOrder: "ASC" | "DESC" = "ASC"
     ) {
         try {
             const offset = (page - 1) * limit;
@@ -71,11 +73,15 @@ export class PortfolioService {
             if (typeId) {
                 whereClause.typeId = typeId;
             }
-            const {count, rows: portfolio} = await this.portfolioRepository.findAndCountAll({
+            const {
+                count,
+                rows: portfolio,
+            } = await this.portfolioRepository.findAndCountAll({
                 where: whereClause,
                 include: { all: true },
                 offset,
                 limit,
+                order: [[sortBy, sortOrder]]
             });
             const pageCount = Math.ceil(count / limit);
             return { portfolio, count, page, pageCount, limit };
@@ -111,10 +117,14 @@ export class PortfolioService {
             const portfolio = await this.portfolioRepository.findByPk(
                 portfolioId
             );
-            if (portfolio) {
+            const Type = await this.typeRepository.findByPk(
+                updatePortfolioDto.typeId
+            );
+            if (portfolio && Type) {
                 const user = req.user;
                 if (portfolio.userId == user.id) {
                     updatePortfolioDto.userId = user.id;
+                    updatePortfolioDto.type = Type;
                     let fileName = portfolio.image;
                     if (image) {
                         fileName = await this.fileService.createFile(image);
@@ -129,10 +139,12 @@ export class PortfolioService {
                         image: fileName,
                         docs: fileDocsName,
                     });
-                    const portfolioupd = await this.portfolioRepository.findOne({
-                        where: { id:portfolioId },
-                        include: { all: true },
-                    });
+                    const portfolioupd = await this.portfolioRepository.findOne(
+                        {
+                            where: { id: portfolioId },
+                            include: { all: true },
+                        }
+                    );
                     return portfolioupd;
                 } else {
                     throw new HttpException(
@@ -168,7 +180,7 @@ export class PortfolioService {
                         await this.fileService.deleteFile(portfolio.docs);
                     }
                     await portfolio.destroy();
-                    await Type.decrement('count')
+                    await Type.decrement("count");
                     await User.decrement("portfolioCount");
 
                     return {

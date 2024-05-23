@@ -24,7 +24,7 @@ export class CoursesService {
 
     async getAllCoursesByAuthorId(
         req: any,
-        authorId: number,
+        authorId: string,
         page: number = 1,
         limit: number = 10
     ) {
@@ -115,7 +115,7 @@ export class CoursesService {
 
     async getCoursesByAuthorByCategory(
         req: any,
-        authorId: number,
+        authorId: string,
         page: number = 1,
         limit: number = 10,
         category: any

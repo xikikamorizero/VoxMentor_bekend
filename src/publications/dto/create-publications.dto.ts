@@ -17,5 +17,5 @@ export class CreatePublicationsDto {
     readonly link: string;
 
     @ApiProperty({example: 12, description: 'id Пользователя'})
-    userId: number;
+    userId: string;
 }

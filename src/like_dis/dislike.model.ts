@@ -8,8 +8,8 @@ import {
 import { User } from "../users/users.model";
 
 interface DislikeCreationAttrs {
-    userId: number;
-    dislikedUserId: number;
+    userId: string;
+    dislikedUserId: string;
 }
 
 @Table({ tableName: "Dislike" })
@@ -18,10 +18,10 @@ export class Dislike extends Model<Dislike, DislikeCreationAttrs> {
     id: number;
 
     @ForeignKey(() => User)
-    @Column({ type: DataType.INTEGER })
-    userId: number;
+    @Column({ type: DataType.UUID })
+    userId: string;
 
     @ForeignKey(() => User)
-    @Column({ type: DataType.INTEGER })
-    dislikedUserId: number;
+    @Column({ type: DataType.UUID })
+    dislikedUserId: string;
 }

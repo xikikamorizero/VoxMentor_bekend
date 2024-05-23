@@ -15,7 +15,7 @@ export class CreateDto {
     readonly valueUz: string;
 
     @ApiProperty({example: 12, description: 'id Пользователя'})
-    userId: number;
+    userId: string;
 
     @ApiProperty({example: 'Администратор с полными правами', description: 'Описание роли'})
     @IsString({message: 'Должно быть строкой'})

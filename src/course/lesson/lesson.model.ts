@@ -9,7 +9,7 @@ interface LessonCreationAttrs {
   description : string|null;
   image:string;
   lesson_number : number|null;
-  reading_materials : string[];
+  // reading_materials : string[];
 }
 
 @Table({ tableName: 'Lesson'})
@@ -32,8 +32,8 @@ export class Lesson extends Model<Lesson, LessonCreationAttrs> {
   @Column({ type: DataType.INTEGER, allowNull: true })
   lesson_number: number;
 
-  @Column({ type: DataType.ARRAY(DataType.STRING), allowNull: true })
-  reading_materials: string[];
+  // @Column({ type: DataType.ARRAY(DataType.STRING), allowNull: true })
+  // reading_materials: string[];
 
   @ForeignKey(() => Course)
   @Column({ type: DataType.INTEGER })

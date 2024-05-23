@@ -51,7 +51,9 @@ export class PortfolioController {
             filerDto.category,
             filerDto.typeId,
             filerDto.page,
-            filerDto.limit
+            filerDto.limit,
+            filerDto.sortBy,
+            filerDto.sortOrder
         );
     }
 

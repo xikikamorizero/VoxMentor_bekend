@@ -21,5 +21,5 @@ export class CreateCourseDto {
     readonly year: number;
 
     @ApiProperty({example: 12, description: 'id Пользователя'})
-    authorId?: number;
+    authorId?: string;
 }

@@ -22,6 +22,6 @@ export class CreateLessonDto {
     // @IsNumber({}, {message: "Должно быть числом"})
     readonly lesson_number : number;
 
-    @ApiProperty({example: 'test text', description: 'Текст'})
-    readonly reading_materials : string[];
+    // @ApiProperty({example: 'test text', description: 'Текст'})
+    // readonly reading_materials : string[];
 }

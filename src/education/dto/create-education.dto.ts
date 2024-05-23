@@ -10,5 +10,5 @@ export class CreateEducationDto {
     readonly date: string;
 
     @ApiProperty({example: 12, description: 'id Пользователя'})
-    userId: number;
+    userId: string;
 }

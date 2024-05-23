@@ -41,6 +41,6 @@ export class Publications extends Model<Publications, PublicationsCreationAttrs>
     link: string;
 
     @ForeignKey(() => User)
-    @Column({ type: DataType.INTEGER })
-    userId: number;
+    @Column({ type: DataType.UUID })
+    userId: string;
 }

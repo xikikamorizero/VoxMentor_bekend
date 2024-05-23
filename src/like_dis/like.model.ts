@@ -1,9 +1,15 @@
-import { Column, Table, Model, ForeignKey, DataType } from 'sequelize-typescript';
-import { User } from '../users/users.model';
+import {
+    Column,
+    Table,
+    Model,
+    ForeignKey,
+    DataType,
+} from "sequelize-typescript";
+import { User } from "../users/users.model";
 
 interface LikeCreationAttrs {
-  userId: number;
-  likedUserId: number;
+    userId: string;
+    likedUserId: string;
 }
 
 @Table({ tableName: "Like" })
@@ -12,10 +18,10 @@ export class Like extends Model<Like, LikeCreationAttrs> {
     id: number;
 
     @ForeignKey(() => User)
-    @Column({ type: DataType.INTEGER })
-    userId: number;
+    @Column({ type: DataType.UUID })
+    userId: string;
 
     @ForeignKey(() => User)
-    @Column({ type: DataType.INTEGER })
-    likedUserId: number;
+    @Column({ type: DataType.UUID })
+    likedUserId: string;
 }

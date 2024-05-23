@@ -21,5 +21,5 @@ export class CreateTraningDto {
     readonly organization: string;
 
     @ApiProperty({ example: 12, description: "id Пользователя" })
-    userId: number;
+    userId: string;
 }

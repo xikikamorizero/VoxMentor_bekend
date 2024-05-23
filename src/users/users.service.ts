@@ -106,10 +106,17 @@ export default class UsersService {
         portfolioMax: number,
         courseMin: number,
         courseMax: number,
-        category: string[] | string,
 
+        likesMin: number,
+        likesMax: number,
+        dislikesMin: number,
+        dislikesMax: number,
+        category: string[] | string,
         page: number = 1,
-        limit: number = 10
+        limit: number = 10,
+        
+        sortBy: string = "createdAt",
+        sortOrder: "ASC" | "DESC" = "ASC",
     ) {
         try {
             const offset = (page - 1) * limit;
@@ -180,6 +187,31 @@ export default class UsersService {
                 };
             }
 
+            // 
+            if (likesMin) {
+                whereClause.likes = {
+                    [Op.gte]: likesMin,
+                };
+            }
+            if (likesMax) {
+                whereClause.likes = {
+                    ...whereClause.likes,
+                    [Op.lte]: likesMax,
+                };
+            }
+            if (dislikesMin) {
+                whereClause.dislikes = {
+                    [Op.gte]: dislikesMin,
+                };
+            }
+            if (dislikesMax) {
+                whereClause.likes = {
+                    ...whereClause.dislikes,
+                    [Op.lte]: dislikesMax,
+                };
+            }
+            // 
+
             if (category && category.length > 0) {
                 let categoryArray = Array.isArray(category)
                     ? category
@@ -199,6 +231,7 @@ export default class UsersService {
                     attributes: [],
                     where: { value: "Professor" },
                 },
+                order: [[sortBy, sortOrder]]
             });
             const totalUsers = await this.userRepository.count({
                 where: whereClause,
@@ -219,16 +252,20 @@ export default class UsersService {
 
     async test() {
         try {
-            const a=Sequelize.literal(`COUNT("portfolio"."id") >= ${0} AND COUNT("portfolio"."id") <= ${0}`) 
+            const a = Sequelize.literal(
+                `COUNT("portfolio"."id") >= ${0} AND COUNT("portfolio"."id") <= ${0}`
+            );
             const users = await User.findAll({
-                include: [{
-                    model: Portfolio,
-                    as: 'portfolio',
-                    where: { typeId: 2 },
-                    required: false
-                }],
-                group: ['User.id', 'portfolio.id'],
-                having: a
+                include: [
+                    {
+                        model: Portfolio,
+                        as: "portfolio",
+                        where: { typeId: 2 },
+                        required: false,
+                    },
+                ],
+                group: ["User.id", "portfolio.id"],
+                having: a,
             });
             return users;
         } catch (error) {
@@ -410,7 +447,7 @@ export default class UsersService {
         return user?.course || [];
     }
 
-    async subscribe(subscriberId: number, authorId: number) {
+    async subscribe(subscriberId: string, authorId: string) {
         const author = await this.userRepository.findByPk(authorId);
         const subscriber = await this.userRepository.findByPk(subscriberId);
         const subscription = await this.subscriptionRepository.findOne({
@@ -447,7 +484,7 @@ export default class UsersService {
         }
     }
 
-    async unsubscribe(subscriberId: number, authorId: number) {
+    async unsubscribe(subscriberId: string, authorId: string) {
         const subscription = await this.subscriptionRepository.findOne({
             where: { subscriberId, authorId },
         });
@@ -485,8 +522,8 @@ export default class UsersService {
     }
 
     async checkSubscription(
-        subscriberId: number,
-        authorId: number
+        subscriberId: string,
+        authorId: string
     ): Promise<boolean> {
         const subscription = await this.subscriptionRepository.findOne({
             where: { subscriberId, authorId },
@@ -495,7 +532,7 @@ export default class UsersService {
         return !!subscription;
     }
     //Функционал лайков и дизлайков
-    async like(userId: number, likedUserId: number) {
+    async like(userId: string, likedUserId: string) {
         const user = await this.userRepository.findByPk(userId);
         const likedUser = await this.userRepository.findByPk(likedUserId);
         if (!user || !likedUser) {
@@ -530,7 +567,7 @@ export default class UsersService {
         }
     }
 
-    async unlike(userId: number, likedUserId: number) {
+    async unlike(userId: string, likedUserId: string) {
         const user = await this.userRepository.findByPk(userId);
         const likedUser = await this.userRepository.findByPk(likedUserId);
 
@@ -570,7 +607,7 @@ export default class UsersService {
         });
     }
 
-    async dislike(userId: number, dislikedUserId: number) {
+    async dislike(userId: string, dislikedUserId: string) {
         const user = await this.userRepository.findByPk(userId);
         const dislikedUser = await this.userRepository.findByPk(dislikedUserId);
 
@@ -606,7 +643,7 @@ export default class UsersService {
         }
     }
 
-    async undislike(userId: number, dislikedUserId: number) {
+    async undislike(userId: string, dislikedUserId: string) {
         const user = await this.userRepository.findByPk(userId);
         const dislikedUser = await this.userRepository.findByPk(dislikedUserId);
         if (!user || !dislikedUser) {

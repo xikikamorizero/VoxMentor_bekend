@@ -6,4 +6,6 @@ export class GetTaskSearchParams {
     typeId: number;
     page: number;
     limit: number;
+    sortBy: string;
+    sortOrder: "ASC" | "DESC";
 }

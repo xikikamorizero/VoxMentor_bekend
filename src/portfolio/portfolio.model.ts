@@ -4,16 +4,15 @@ import {
     ForeignKey,
     Model,
     Table,
-    BelongsTo
+    BelongsTo,
 } from "sequelize-typescript";
 import { User } from "../users/users.model";
 import { Type } from "../type_portfolio/types.model";
-import { PortfolioTypes } from "../type_portfolio/portfolio-types.model";
 
 interface PortfolioCreationAttrs {
     title: string;
     content: string;
-    userId: number;
+    userId: string;
     image: string | null;
     docs: string | null;
     year: number;
@@ -52,6 +51,6 @@ export class Portfolio extends Model<Portfolio, PortfolioCreationAttrs> {
     type: Type;
 
     @ForeignKey(() => User)
-    @Column({ type: DataType.INTEGER })
-    userId: number;
+    @Column({ type: DataType.UUID })
+    userId: string;
 }

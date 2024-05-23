@@ -12,7 +12,15 @@ export class GetTaskSearchParams {
     portfolioMax: number;
     courseMin: number;
     courseMax: number;
-    category:string[];
+    likesMin: number;
+    likesMax: number;
+    dislikesMin: number;
+    dislikesMax: number;
+    category: string[];
+    
+    sortBy: string;
+    sortOrder: "ASC" | "DESC";
+
     page: number;
     limit: number;
 }

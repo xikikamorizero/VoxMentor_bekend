@@ -23,5 +23,5 @@ export class CreatePortfolioDto {
     type: any;
 
     @ApiProperty({example: 12, description: 'id Пользователя'})
-    userId: number;
+    userId: string;
 }
