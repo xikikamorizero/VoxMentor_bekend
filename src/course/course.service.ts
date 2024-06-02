@@ -210,7 +210,10 @@ export class CoursesService {
             if (isSubscribed || user.id == course.authorId) {
                 return course;
             } else {
-                throw new NotFoundException("нет доступа");
+                throw new HttpException(
+                    "",
+                    HttpStatus.FORBIDDEN
+                );
             }
         } else {
             throw new NotFoundException("course not found");
@@ -220,7 +223,7 @@ export class CoursesService {
     async createCourse(dto: CreateCourseDto, image: any, req: any) {
         try {
             const User = await this.userRepository.findByPk(req.user.id);
-            if(User){
+            if (User) {
                 dto.authorId = User.id;
                 let fileName = null;
                 if (image) {
@@ -232,12 +235,10 @@ export class CoursesService {
                 });
                 await User.increment("courseCount");
                 return course;
-            }
-            else{
+            } else {
                 throw new NotFoundException("user not found");
             }
-            
-        } catch{
+        } catch {
             throw error;
         }
     }

@@ -35,8 +35,9 @@ export class LessonsService {
             if (user.id == course.authorId || isSubscribed) {
                 return lesson;
             } else {
-                throw new NotFoundException(
-                    "you are not the author of the lesson or a subscriber of the lesson"
+                throw new HttpException(
+                    "",
+                    HttpStatus.FORBIDDEN
                 );
             }
         } else {
